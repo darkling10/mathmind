@@ -10,7 +10,7 @@ export default function LoadingScreen({ onComplete }) {
     'Warming up WebGL 3D Surface Renderer...',
     'Loading KaTeX Mathematical Typesetting...',
     'Preparing Interactive Graphing Suite...',
-    'MathMind AI Studio Ready!'
+    'MathMind Studio Ready!'
   ];
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function LoadingScreen({ onComplete }) {
         {/* Brand Name */}
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-cyan-300">
-            MathMind <span className="text-indigo-400">AI</span>
+            MathMind
           </h1>
           <p className="text-xs text-slate-400 font-medium tracking-wide mt-1">
             Next-Gen Mathematical & Calculus Studio

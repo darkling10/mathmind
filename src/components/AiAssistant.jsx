@@ -7,7 +7,7 @@ export default function AiAssistant({ onApplyToGraph }) {
   const [messages, setMessages] = useState([
     {
       sender: 'ai',
-      text: "Hello! I'm your **MathMind AI Assistant**. Ask me any math question, calculus problem, vector field concept, or ask me to plot 2D/3D functions!",
+      text: "Hello! I'm your **MathMind Assistant**. Ask me any math question, calculus problem, vector field concept, or ask me to plot 2D/3D functions!",
       suggestedEquation: null
     }
   ]);

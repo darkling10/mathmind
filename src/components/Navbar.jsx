@@ -96,7 +96,7 @@ export default function Navbar({
             </div>
             <div>
               <h1 className="text-base font-extrabold tracking-tight whitespace-nowrap">
-                MathMind <span className="text-indigo-400">AI</span>
+                MathMind
               </h1>
               <p className="text-[10px] opacity-60 font-medium whitespace-nowrap">Modular Studio</p>
             </div>

@@ -157,7 +157,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-6 gap-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-500" />
-              <span className="font-semibold">MathMind AI</span> — Modular Mathematical Studio
+              <span className="font-semibold">MathMind</span> — Modular Mathematical Studio
             </div>
             
             <div className="flex items-center gap-1.5 font-medium">
