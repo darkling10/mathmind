@@ -7,7 +7,8 @@ import {
   BookOpen, 
   Layers,
   BrainCircuit,
-  Zap
+  Zap,
+  HelpCircle
 } from 'lucide-react';
 import { FEATURE_FLAGS } from '../config/featureFlags';
 
@@ -64,7 +65,13 @@ export default function Navbar({
       label: 'AI Tutor', 
       icon: Sparkles,
       subTools: []
-    }] : [])
+    }] : []),
+    {
+      id: 'docs',
+      label: 'User Guide & Docs',
+      icon: HelpCircle,
+      subTools: []
+    }
   ];
 
   const currentDomainObj = allDomains.find(d => d.id === primaryDomain) || allDomains[0];

@@ -7,6 +7,7 @@ import PhysicsSimulator from './components/physics/PhysicsSimulator';
 import EquationSolver from './components/EquationSolver';
 import MatrixLab from './components/MatrixLab';
 import AiAssistant from './components/AiAssistant';
+import DocumentationHub from './components/DocumentationHub';
 import PresetLibrary from './components/PresetLibrary';
 import CheatSheetModal from './components/CheatSheetModal';
 import LoadingScreen from './components/LoadingScreen';
@@ -17,7 +18,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Dual-Tier Navigation State
-  const [primaryDomain, setPrimaryDomain] = useState('graphing'); // 'graphing', 'calculus', 'physics', 'algebra', 'ai'
+  const [primaryDomain, setPrimaryDomain] = useState('graphing'); // 'graphing', 'calculus', 'physics', 'algebra', 'ai', 'docs'
   const [subTool, setSubTool] = useState('2d');
 
   // Shared active equations
@@ -116,6 +117,14 @@ export default function App() {
           {/* AI Tutor Category */}
           {primaryDomain === 'ai' && (
             <AiAssistant onApplyToGraph={(eq, mode) => handleSendToGraph(eq, mode)} />
+          )}
+
+          {/* Documentation & User Guide Hub */}
+          {primaryDomain === 'docs' && (
+            <DocumentationHub onNavigateToDomain={(domain, sub) => {
+              setPrimaryDomain(domain);
+              if (sub) setSubTool(sub);
+            }} />
           )}
 
         </main>
