@@ -56,7 +56,8 @@ export default function AiAssistant({ onApplyToGraph }) {
     try {
       return { __html: katex.renderToString(tex, { throwOnError: false }) };
     } catch (e) {
-      return { __html: tex };
+      const escaped = tex.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return { __html: escaped };
     }
   };
 

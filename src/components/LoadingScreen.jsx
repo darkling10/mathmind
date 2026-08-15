@@ -17,20 +17,25 @@ export default function LoadingScreen({ onComplete }) {
     // Progress bar ticker simulation
     const interval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            if (onComplete) onComplete();
-          }, 400);
-          return 100;
-        }
         const next = prev + Math.floor(Math.random() * 15) + 10;
         return next > 100 ? 100 : next;
       });
     }, 120);
 
     return () => clearInterval(interval);
-  }, [onComplete]);
+  }, []);
+
+  useEffect(() => {
+    let timeoutId;
+    if (progress >= 100) {
+      timeoutId = setTimeout(() => {
+        if (onComplete) onComplete();
+      }, 400);
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [progress, onComplete]);
 
   useEffect(() => {
     // Caption text rotation based on progress

@@ -400,15 +400,33 @@ export function computeDefiniteIntegral(exprString, a = 0, b = 1, n = 200) {
     const compiled = math.compile(exprString);
     if (n % 2 !== 0) n += 1;
     const h = (b - a) / n;
+    const eps = h / 100;
     
-    let sum = compiled.evaluate({ x: a }) + compiled.evaluate({ x: b });
+    let nonFiniteCount = 0;
+    const evalSafe = (x, isEndpoint) => {
+      let val = compiled.evaluate({ x });
+      if (!isFinite(val) && isEndpoint) {
+        val = compiled.evaluate({ x: x === a ? a + eps : b - eps });
+      }
+      if (!isFinite(val)) {
+        nonFiniteCount++;
+        return 0;
+      }
+      return val;
+    };
+    
+    let sum = evalSafe(a, true) + evalSafe(b, true);
     for (let i = 1; i < n; i++) {
       const x = a + i * h;
-      const val = compiled.evaluate({ x });
-      sum += (i % 2 === 0 ? 2 : 4) * val;
+      sum += (i % 2 === 0 ? 2 : 4) * evalSafe(x, false);
     }
+    
+    if (nonFiniteCount > n * 0.2) {
+      return { result: null, error: "Too many non-finite evaluations" };
+    }
+    
     const result = (h / 3) * sum;
-    return { result: Math.round(result * 100000) / 100000, error: null };
+    return { result: Math.round(result * 100000) / 100000, error: nonFiniteCount > 0 ? "Approximate due to singularities" : null };
   } catch (error) {
     return { result: null, error: error.message };
   }

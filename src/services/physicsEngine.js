@@ -12,17 +12,22 @@
  * y(t) = h0 + v0 * sin(theta) * t - 0.5 * g * t^2
  */
 export function computeIdealProjectile(v0 = 25, angleDeg = 45, h0 = 0, g = 9.81, points = 300) {
+  v0 = Number(v0); angleDeg = Number(angleDeg); h0 = Number(h0); g = Number(g); points = Number(points);
+  if (g <= 0) g = 0;
+
   const rad = (angleDeg * Math.PI) / 180;
   const vx0 = v0 * Math.cos(rad);
   const vy0 = v0 * Math.sin(rad);
 
-  // Time of flight: y(t) = 0 => 0.5*g*t^2 - vy0*t - h0 = 0
-  // Quadratic formula: t = (vy0 + sqrt(vy0^2 + 2*g*h0)) / g
-  const disc = vy0 * vy0 + 2 * g * h0;
-  const tFlight = (vy0 + Math.sqrt(disc)) / g;
-
-  // Max Height: H_max = h0 + (vy0^2) / (2g)
-  const hMax = h0 + (vy0 * vy0) / (2 * g);
+  let tFlight, hMax;
+  if (g === 0) {
+    tFlight = (vy0 < 0 && h0 > 0) ? -h0 / vy0 : 10;
+    hMax = vy0 > 0 ? h0 + vy0 * tFlight : h0;
+  } else {
+    const disc = vy0 * vy0 + 2 * g * h0;
+    tFlight = (vy0 + Math.sqrt(disc)) / g;
+    hMax = vy0 > 0 ? h0 + (vy0 * vy0) / (2 * g) : h0;
+  }
   // Max Distance (Range)
   const range = vx0 * tFlight;
 
@@ -77,6 +82,7 @@ export function computeIdealProjectile(v0 = 25, angleDeg = 45, h0 = 0, g = 9.81,
  * dvy/dt = -g - (k/m) * vy
  */
 export function computeDragProjectile(v0 = 25, angleDeg = 45, h0 = 0, g = 9.81, dragK = 0.1, mass = 1, dt = 0.01) {
+  v0 = Number(v0); angleDeg = Number(angleDeg); h0 = Number(h0); g = Number(g); dragK = Number(dragK); mass = Math.max(0.01, Number(mass)); dt = Number(dt);
   const rad = (angleDeg * Math.PI) / 180;
   let vx = v0 * Math.cos(rad);
   let vy = v0 * Math.sin(rad);
@@ -89,8 +95,10 @@ export function computeDragProjectile(v0 = 25, angleDeg = 45, h0 = 0, g = 9.81, 
   const yValues = [];
 
   let hMax = h0;
+  let iters = 0;
 
-  while (y >= 0 && t < 100) {
+  while (y >= 0 && t < 100 && iters < 2000) {
+    iters++;
     tValues.push(Number(t.toFixed(3)));
     xValues.push(Number(x.toFixed(3)));
     yValues.push(Number(y.toFixed(3)));
@@ -124,6 +132,7 @@ export function computeDragProjectile(v0 = 25, angleDeg = 45, h0 = 0, g = 9.81, 
  * Differential Equation: m * x'' + c * x' + k * x = F0 * cos(omega * t)
  */
 export function computeHarmonicOscillator(m = 1, c = 0.5, k = 10, F0 = 0, omega = 2, x0 = 1, v0 = 0, tMax = 10, points = 400) {
+  m = Math.max(0.01, Number(m)); c = Number(c); k = Number(k); F0 = Number(F0); omega = Number(omega); x0 = Number(x0); v0 = Number(v0); tMax = Number(tMax); points = Number(points);
   const omega0 = Math.sqrt(k / m); // Natural frequency
   const gamma = c / (2 * m); // Damping factor
 
@@ -150,9 +159,10 @@ export function computeHarmonicOscillator(m = 1, c = 0.5, k = 10, F0 = 0, omega 
   }
 
   // Damping regime classification
+  const zeta = c / (2 * Math.sqrt(k * m));
   let regime = 'Underdamped';
-  if (Math.abs(gamma * gamma - omega0 * omega0) < 1e-4) regime = 'Critically Damped';
-  else if (gamma * gamma > omega0 * omega0) regime = 'Overdamped';
+  if (Math.abs(zeta - 1) < 1e-4) regime = 'Critically Damped';
+  else if (zeta > 1) regime = 'Overdamped';
 
   return {
     omega0: Number(omega0.toFixed(3)),

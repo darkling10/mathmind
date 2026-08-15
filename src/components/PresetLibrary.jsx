@@ -24,8 +24,8 @@ export default function PresetLibrary({ onSelectPreset, onClose }) {
     {
       name: 'Vector Fields & Linear Transformations',
       presets: [
-        { title: 'Rotational Fluid Vortex', eq: '-y', mode: '3d', desc: 'Vector field F(x,y) = (-y, x) showing angular circulation.' },
-        { title: 'Source Expansion Field', eq: 'x', mode: '3d', desc: 'Vector field radiating outward from origin.' }
+        { title: 'Rotational Fluid Vortex', eq: '-y', mode: 'vector', desc: 'Vector field F(x,y) = (-y, x) showing angular circulation.' },
+        { title: 'Source Expansion Field', eq: 'x', mode: 'vector', desc: 'Vector field radiating outward from origin.' }
       ]
     }
   ];

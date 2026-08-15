@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 const ThemeContext = createContext();
 
@@ -55,21 +55,30 @@ export const THEMES = {
   }
 };
 
+const safeGetItem = (key, fallback) => {
+  try { return localStorage.getItem(key) || fallback; } catch { return fallback; }
+};
+const safeSetItem = (key, value) => {
+  try { localStorage.setItem(key, value); } catch {}
+};
+
 export function ThemeProvider({ children }) {
   const [themeId, setThemeId] = useState(() => {
-    return localStorage.getItem('mathmind_theme') || 'dark-default';
+    return safeGetItem('mathmind_theme', 'dark-default');
   });
 
   const currentTheme = THEMES[themeId] || THEMES['dark-default'];
 
   useEffect(() => {
-    localStorage.setItem('mathmind_theme', themeId);
+    safeSetItem('mathmind_theme', themeId);
     document.documentElement.setAttribute('data-theme', themeId);
     document.documentElement.setAttribute('data-mode', currentTheme.mode);
   }, [themeId, currentTheme]);
 
+  const contextValue = useMemo(() => ({ themeId, setThemeId, currentTheme, THEMES }), [themeId, currentTheme]);
+
   return (
-    <ThemeContext.Provider value={{ themeId, setThemeId, currentTheme, THEMES }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
