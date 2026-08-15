@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import katex from 'katex';
 import { 
-  BookOpen, 
   HelpCircle, 
   Lightbulb, 
   LineChart, 
@@ -8,21 +8,39 @@ import {
   Zap, 
   Calculator, 
   CheckCircle2, 
-  ChevronRight,
   Code,
-  Sparkles
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
+
+function KatexSpan({ math, displayMode = false }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current || !math) return;
+    try {
+      katex.render(math, containerRef.current, {
+        throwOnError: false,
+        displayMode
+      });
+    } catch (err) {
+      if (containerRef.current) containerRef.current.innerText = math;
+    }
+  }, [math, displayMode]);
+
+  return <span ref={containerRef} className="inline-block text-cyan-300 font-mono" />;
+}
 
 export default function DocumentationHub({ onNavigateToDomain }) {
   const [activeGuide, setActiveGuide] = useState('quickstart');
 
   const syntaxExamples = [
-    { label: 'Exponents & Powers', input: 'x^3 + 2*x^2 - 5', desc: 'Use ^ for powers' },
-    { label: 'Trigonometry', input: 'sin(2*x) + cos(x)', desc: 'Radians mode' },
-    { label: 'Square Roots', input: 'sqrt(x^2 + 1)', desc: 'Use sqrt(...) for roots' },
-    { label: 'Exponential & Log', input: 'exp(-0.2*x) * log(x)', desc: 'Natural exp and log' },
-    { label: 'Calculus Derivative', input: 'd/dx(x^3 * sin(x))', desc: 'Symbolic differentiation' },
-    { label: 'Quadratic Equation', input: 'x^2 - 5*x + 6 = 0', desc: 'Equated to zero or value' }
+    { label: 'Exponents & Powers', input: 'x^3 + 2*x^2 - 5', math: 'x^3 + 2x^2 - 5', desc: 'Use ^ for exponentiation' },
+    { label: 'Trigonometry', input: 'sin(2*x) + cos(x)', math: '\\sin(2x) + \\cos(x)', desc: 'Standard trigonometric functions' },
+    { label: 'Square Roots', input: 'sqrt(x^2 + 1)', math: '\\sqrt{x^2 + 1}', desc: 'Use sqrt(...) for roots' },
+    { label: 'Exponential & Log', input: 'exp(-0.2*x) * log(x)', math: 'e^{-0.2x} \\cdot \\ln(x)', desc: 'Natural exponential & log' },
+    { label: 'Calculus Derivative', input: 'd/dx(x^3 * sin(x))', math: '\\frac{d}{dx}\\left(x^3 \\sin(x)\\right)', desc: 'Symbolic differentiation' },
+    { label: 'Quadratic Equation', input: 'x^2 - 5*x + 6 = 0', math: 'x^2 - 5x + 6 = 0', desc: 'Step-by-step quadratic root solver' }
   ];
 
   return (
@@ -42,7 +60,7 @@ export default function DocumentationHub({ onNavigateToDomain }) {
 
         <div className="flex items-center gap-2">
           <span className="badge-neon text-xs font-mono font-bold px-3 py-1 rounded-full">
-            Quick User Guide
+            User Guide v2.0
           </span>
         </div>
       </div>
@@ -118,7 +136,7 @@ export default function DocumentationHub({ onNavigateToDomain }) {
                 </div>
                 <h4 className="text-xs font-bold text-white">Select Your Studio Category</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Use the primary top bar to switch between <strong>Graphing & Geometry</strong>, <strong>Calculus Suite</strong>, <strong>Physics & Dynamics</strong>, or <strong>Algebra & Solvers</strong>.
+                  Use the top navigation bar to switch between <strong>Graphing & Geometry</strong>, <strong>Calculus Suite</strong>, <strong>Physics & Dynamics</strong>, or <strong>Algebra & Solvers</strong>.
                 </p>
               </div>
 
@@ -128,7 +146,7 @@ export default function DocumentationHub({ onNavigateToDomain }) {
                 </div>
                 <h4 className="text-xs font-bold text-white">Enter Expressions or Sliders</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Type standard mathematical notation into input boxes or click the <strong>Virtual Keyboard</strong> button to insert symbols like $\pi, \theta, \sqrt{x}, \frac{d}{dx}$.
+                  Type expressions directly into input boxes with real-time math autocomplete, or use the <strong>Virtual Keyboard</strong> for mathematical symbols.
                 </p>
               </div>
 
@@ -138,7 +156,7 @@ export default function DocumentationHub({ onNavigateToDomain }) {
                 </div>
                 <h4 className="text-xs font-bold text-white">Explore Presets & Cheatsheet</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Click <strong>Preset Gallery</strong> in the header to load pre-configured physics simulations, saddle surfaces, and wave harmonics instantly!
+                  Click <strong>Presets</strong> in the header to load pre-configured physics simulations, saddle surfaces, and wave harmonics instantly!
                 </p>
               </div>
 
@@ -153,12 +171,29 @@ export default function DocumentationHub({ onNavigateToDomain }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {syntaxExamples.map((ex, i) => (
-                <div key={i} className="glass-card p-3.5 rounded-xl border border-white/10 space-y-1.5">
-                  <span className="text-[11px] font-bold text-slate-300">{ex.label}</span>
-                  <div className="p-2 bg-slate-950/80 rounded-lg border border-white/5 font-mono text-xs text-cyan-300">
-                    {ex.input}
+                <div key={i} className="glass-card p-4 rounded-xl border border-white/10 space-y-2 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-300">{ex.label}</span>
+                    <div className="my-1.5 p-2 bg-slate-950/80 rounded-lg border border-white/5 flex items-center justify-between">
+                      <KatexSpan math={ex.math} />
+                      <span className="text-[10px] font-mono text-slate-500">{ex.input}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">{ex.desc}</p>
                   </div>
-                  <p className="text-[11px] text-slate-400">{ex.desc}</p>
+
+                  <button
+                    onClick={() => {
+                      if (ex.input.includes('=')) {
+                        onNavigateToDomain('algebra', 'solver');
+                      } else {
+                        onNavigateToDomain('graphing', '2d');
+                      }
+                    }}
+                    className="mt-2 text-[11px] font-bold text-cyan-300 hover:text-white flex items-center gap-1 self-end"
+                  >
+                    <span>Try in Studio</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -176,17 +211,17 @@ export default function DocumentationHub({ onNavigateToDomain }) {
           <div className="space-y-4 text-xs text-slate-300 leading-relaxed">
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-cyan-300">Plotting Multiple Functions</h4>
-              <p>In 2D Function Plotter, click <strong>+ Add Curve</strong> to plot up to 4 curves simultaneously. Each curve receives a distinct neon color ($f_1(x), f_2(x), f_3(x)$).</p>
+              <p>In 2D Function Plotter, click <strong>+ Add Curve</strong> to plot up to 4 curves simultaneously. Each curve receives a distinct neon color.</p>
             </div>
 
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-cyan-300">Live Coefficient Sliders</h4>
-              <p>Define coefficients like $a, b, c, k$ in expressions (e.g. $y = a \cdot \sin(b \cdot x + c)$) and slide them in real time to observe live function transformations.</p>
+              <p>Define coefficients like <KatexSpan math="a, b, c, k" /> in expressions and slide them in real time to observe live function transformations.</p>
             </div>
 
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-cyan-300">3D WebGL Surfaces</h4>
-              <p>Switch to 3D WebGL Studio to plot multivariable surfaces $z = f(x, y)$, 3D parametric shapes (Torus, Sphere, Mobius Strip), and 2D vector flow fields.</p>
+              <p>Switch to 3D WebGL Studio to plot multivariable surfaces <KatexSpan math="z = f(x, y)" />, 3D parametric shapes (Torus, Sphere, Mobius Strip), and 2D vector flow fields.</p>
             </div>
           </div>
         </div>
@@ -201,17 +236,17 @@ export default function DocumentationHub({ onNavigateToDomain }) {
           <div className="space-y-4 text-xs text-slate-300 leading-relaxed">
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-purple-300">Tangent Line & Derivative Inspector</h4>
-              <p>Slide $x_0$ along curve $f(x)$ to watch the tangent line $y - f(x_0) = f'(x_0)(x - x_0)$ update live on the graph while computing the exact slope $f'(x_0)$.</p>
+              <p>Slide <KatexSpan math="x_0" /> along curve <KatexSpan math="f(x)" /> to watch the tangent line update live on the graph while computing the exact slope <KatexSpan math="f'(x_0)" />.</p>
             </div>
 
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-purple-300">Riemann Sums Integral Visualizer</h4>
-              <p>Select **Left Sum**, **Right Sum**, **Midpoint Rule**, or **Trapezoidal Rule** and adjust sub-rectangles $N \in [2, 40]$ to observe visual convergence onto definite integral $\int_a^b f(x) dx$.</p>
+              <p>Select **Left Sum**, **Right Sum**, **Midpoint Rule**, or **Trapezoidal Rule** and adjust sub-rectangles <KatexSpan math="N" /> to observe visual convergence onto definite integral <KatexSpan math="\int_a^b f(x) dx" />.</p>
             </div>
 
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-purple-300">Taylor Series & Slope Fields</h4>
-              <p>Expand functions into Taylor polynomials $P_n(x)$ or render direction fields for differential equations $\frac{dy}{dx} = f(x, y)$.</p>
+              <p>Expand functions into Taylor polynomials <KatexSpan math="P_n(x)" /> or render direction fields for differential equations <KatexSpan math="\frac{dy}{dx} = f(x, y)" />.</p>
             </div>
           </div>
         </div>
@@ -226,12 +261,12 @@ export default function DocumentationHub({ onNavigateToDomain }) {
           <div className="space-y-4 text-xs text-slate-300 leading-relaxed">
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-pink-300">Kinematic Projectile Flight Animation</h4>
-              <p>Set launch velocity $v_0$, angle $\theta$, and initial height $h_0$. Click **Animate Flight** to watch 60 FPS animated projectile trajectory simulation.</p>
+              <p>Set launch velocity <KatexSpan math="v_0" />, angle <KatexSpan math="\theta" />, and initial height <KatexSpan math="h_0" />. Click **Animate Flight** to watch 60 FPS animated projectile trajectory simulation.</p>
             </div>
 
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-pink-300">Gravity Presets & Air Drag Resistance</h4>
-              <p>Switch planetary gravity presets between Earth ($9.81\text{ m/s}^2$), Moon ($1.62\text{ m/s}^2$), Mars ($3.71\text{ m/s}^2$), and Jupiter ($24.79\text{ m/s}^2$). Toggle air resistance drag $k$ to overlay ideal vs resisted paths.</p>
+              <p>Switch planetary gravity presets between Earth (<KatexSpan math="9.81\text{ m/s}^2" />), Moon (<KatexSpan math="1.62\text{ m/s}^2" />), Mars (<KatexSpan math="3.71\text{ m/s}^2" />), and Jupiter (<KatexSpan math="24.79\text{ m/s}^2" />). Toggle air resistance drag <KatexSpan math="k" /> to overlay ideal vs resisted paths.</p>
             </div>
           </div>
         </div>
@@ -246,12 +281,12 @@ export default function DocumentationHub({ onNavigateToDomain }) {
           <div className="space-y-4 text-xs text-slate-300 leading-relaxed">
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-emerald-300">Step-by-Step Symbolic Solver</h4>
-              <p>Enter any quadratic equation (e.g. $x^2 - 5x + 6 = 0$), derivative query ($d/dx(x^3 \cdot \cos(x))$), or linear equation to view step-by-step discriminant and formula derivations.</p>
+              <p>Enter any quadratic equation (e.g. <KatexSpan math="x^2 - 5x + 6 = 0" />), derivative query (<KatexSpan math="\frac{d}{dx}(x^3)" />), or linear equation to view step-by-step discriminant and formula derivations.</p>
             </div>
 
             <div className="glass-card p-4 rounded-xl border border-white/10 space-y-2">
               <h4 className="text-xs font-bold text-emerald-300">Linear Algebra Matrix Laboratory</h4>
-              <p>Enter $2 \times 2$ or $3 \times 3$ matrix grids to compute determinants $\det(A)$, inverse $A^{-1}$, transpose $A^T$, and eigenvalues $\lambda$.</p>
+              <p>Enter 2x2 or 3x3 matrix grids to compute determinants <KatexSpan math="\det(A)" />, inverse <KatexSpan math="A^{-1}" />, transpose <KatexSpan math="A^T" />, and eigenvalues <KatexSpan math="\lambda" />.</p>
             </div>
           </div>
         </div>
@@ -264,7 +299,7 @@ export default function DocumentationHub({ onNavigateToDomain }) {
         </div>
         <div className="text-xs">
           <span className="font-bold text-white uppercase tracking-wide">Pro Tip: </span>
-          <span className="text-slate-300">Tap <strong>Preset Gallery</strong> or <strong>Cheatsheet</strong> in the top header anytime to quickly insert complex engineering presets, physics waves, and calculus identity formulas into your active studio workspace!</span>
+          <span className="text-slate-300">Tap <strong>Presets</strong> or <strong>Cheatsheet</strong> in the top header anytime to quickly insert complex engineering formulas into your active workspace!</span>
         </div>
       </div>
 
