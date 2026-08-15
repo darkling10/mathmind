@@ -7,7 +7,7 @@ export default function ThemeSelectorModal({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="glass-panel p-6 rounded-2xl border border-indigo-500/30 max-w-lg w-full space-y-6 shadow-2xl">
+      <div className="p-6 rounded-2xl border border-indigo-500/30 max-w-lg w-full space-y-6 shadow-2xl bg-slate-900 text-slate-100">
         
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-3">
