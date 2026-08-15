@@ -52,6 +52,7 @@ export default function MathInput({
   // Autocomplete state
   const [suggestions, setSuggestions] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
   const inputRef = useRef(null);
@@ -203,6 +204,8 @@ export default function MathInput({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder={placeholder}
             className={`w-full glass-input text-sm font-mono py-3 px-4 rounded-xl shadow-inner ${
               !isValid ? 'border-pink-500/60 focus:border-pink-500' : ''
@@ -221,7 +224,7 @@ export default function MathInput({
           )}
 
           {/* Autocomplete Dropdown Popup */}
-          {showAutocomplete && suggestions.length > 0 && (
+          {isFocused && showAutocomplete && suggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1.5 z-50 glass-panel p-2 rounded-xl border border-indigo-500/30 shadow-2xl bg-slate-950/95 space-y-1">
               <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 px-2 py-1 flex items-center justify-between border-b border-white/10">
                 <span>Equation Autocomplete</span>
