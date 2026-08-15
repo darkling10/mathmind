@@ -49,9 +49,11 @@ export default function ProjectileMotion() {
     setAnimIndex(0);
   };
 
-  // Render Plots
+  // Render Static Plots
   useEffect(() => {
-    if (!trajectoryPlotRef.current || !energyPlotRef.current) return;
+    const trajNode = trajectoryPlotRef.current;
+    const energyNode = energyPlotRef.current;
+    if (!trajNode || !energyNode) return;
 
     // 1. Trajectory Plot Traces
     const trajTraces = [];
@@ -76,13 +78,10 @@ export default function ProjectileMotion() {
       });
     }
 
-    // Animated Projectile Ball Position Marker
-    const curX = idealData.xValues[Math.min(animIndex, idealData.xValues.length - 1)];
-    const curY = idealData.yValues[Math.min(animIndex, idealData.yValues.length - 1)];
-
+    // Animated Projectile Ball Position Marker (Initial Position)
     trajTraces.push({
-      x: [curX],
-      y: [curY],
+      x: [idealData.xValues[0]],
+      y: [idealData.yValues[0]],
       mode: 'markers',
       name: 'Projectile',
       marker: { color: '#f59e0b', size: 14, symbol: 'circle', line: { color: '#ffffff', width: 2 } }
@@ -113,7 +112,7 @@ export default function ProjectileMotion() {
       }
     };
 
-    Plotly.newPlot(trajectoryPlotRef.current, trajTraces, trajLayout, { responsive: true, displaylogo: false });
+    Plotly.newPlot(trajNode, trajTraces, trajLayout, { responsive: true, displaylogo: false });
 
     // 2. Energy Conservation Plot Traces
     const totalEnergy = idealData.keValues.map((ke, i) => ke + idealData.peValues[i]);
@@ -167,8 +166,33 @@ export default function ProjectileMotion() {
       }
     };
 
-    Plotly.newPlot(energyPlotRef.current, energyTraces, energyLayout, { responsive: true, displaylogo: false });
-  }, [v0, angle, h0, gravity, enableDrag, dragK, animIndex, idealData, dragData]);
+    Plotly.newPlot(energyNode, energyTraces, energyLayout, { responsive: true, displaylogo: false });
+
+    return () => {
+      if (trajNode) Plotly.purge(trajNode);
+      if (energyNode) Plotly.purge(energyNode);
+    };
+  }, [v0, angle, h0, gravity, enableDrag, dragK, idealData, dragData]);
+
+  // Animate Plot Marker
+  useEffect(() => {
+    const trajNode = trajectoryPlotRef.current;
+    if (!trajNode || !trajNode.data) return;
+
+    const markerTraceIndex = (enableDrag && dragData) ? 2 : 1;
+    
+    // Check if the plot has been initialized with traces
+    if (markerTraceIndex >= trajNode.data.length) return;
+
+    const curX = idealData.xValues[Math.min(animIndex, idealData.xValues.length - 1)];
+    const curY = idealData.yValues[Math.min(animIndex, idealData.yValues.length - 1)];
+
+    try {
+      Plotly.restyle(trajNode, { x: [[curX]], y: [[curY]] }, [markerTraceIndex]);
+    } catch (e) {
+      // Prevent crash if trace not available during restyle
+    }
+  }, [animIndex, idealData, enableDrag, dragData]);
 
   return (
     <div className="w-full space-y-6">

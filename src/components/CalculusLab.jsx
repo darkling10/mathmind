@@ -47,7 +47,8 @@ export default function CalculusLab({ activeSubTool = 'tangent' }) {
 
   // Render Tangent Inspector Graph
   useEffect(() => {
-    if (subTab !== 'tangent' || !plotRef.current) return;
+    const node = plotRef.current;
+    if (subTab !== 'tangent' || !node) return;
 
     const mainSampled = sampleFunction2D(targetExpr, -6, 6, 400);
     const tanRes = computeTangentLine(targetExpr, x0);
@@ -109,12 +110,14 @@ export default function CalculusLab({ activeSubTool = 'tangent' }) {
       legend: { font: { color: '#e2e8f0' }, bgcolor: 'rgba(15, 23, 42, 0.85)', orientation: 'h', y: 1.12 }
     };
 
-    Plotly.newPlot(plotRef.current, traces, layout, { responsive: true, displaylogo: false });
+    Plotly.newPlot(node, traces, layout, { responsive: true, displaylogo: false });
+    return () => { if (node) Plotly.purge(node); };
   }, [subTab, targetExpr, x0, showDerivativeCurve]);
 
   // Render Riemann Sums Graph
   useEffect(() => {
-    if (subTab !== 'riemann' || !plotRef.current) return;
+    const node = plotRef.current;
+    if (subTab !== 'riemann' || !node) return;
 
     const mainSampled = sampleFunction2D(targetExpr, -2, 6, 400);
     const rSum = computeRiemannSum(targetExpr, riemannBounds.a, riemannBounds.b, numSubintervals, riemannMethod);
@@ -168,12 +171,14 @@ export default function CalculusLab({ activeSubTool = 'tangent' }) {
       legend: { font: { color: '#e2e8f0' }, bgcolor: 'rgba(15, 23, 42, 0.85)', orientation: 'h', y: 1.12 }
     };
 
-    Plotly.newPlot(plotRef.current, traces, layout, { responsive: true, displaylogo: false });
+    Plotly.newPlot(node, traces, layout, { responsive: true, displaylogo: false });
+    return () => { if (node) Plotly.purge(node); };
   }, [subTab, targetExpr, riemannBounds, numSubintervals, riemannMethod]);
 
   // Render Taylor Series Graph
   useEffect(() => {
-    if (subTab !== 'taylor' || !plotRef.current) return;
+    const node = plotRef.current;
+    if (subTab !== 'taylor' || !node) return;
 
     const mainSampled = sampleFunction2D(taylorFunction, -6, 6, 400);
     const taylorRes = computeTaylorSeries(taylorFunction, taylorCenter, taylorOrder);
@@ -210,12 +215,14 @@ export default function CalculusLab({ activeSubTool = 'tangent' }) {
       legend: { font: { color: '#e2e8f0' }, bgcolor: 'rgba(15, 23, 42, 0.85)', orientation: 'h', y: 1.12 }
     };
 
-    Plotly.newPlot(plotRef.current, traces, layout, { responsive: true, displaylogo: false });
+    Plotly.newPlot(node, traces, layout, { responsive: true, displaylogo: false });
+    return () => { if (node) Plotly.purge(node); };
   }, [subTab, taylorFunction, taylorOrder, taylorCenter]);
 
   // Render ODE Slope Field Graph
   useEffect(() => {
-    if (subTab !== 'slope' || !plotRef.current) return;
+    const node = plotRef.current;
+    if (subTab !== 'slope' || !node) return;
 
     const sampledSF = sampleSlopeField(odeExpr, 18, 5);
     const traces = [];
@@ -245,7 +252,8 @@ export default function CalculusLab({ activeSubTool = 'tangent' }) {
       legend: { font: { color: '#e2e8f0' }, bgcolor: 'rgba(15, 23, 42, 0.85)', orientation: 'h', y: 1.12 }
     };
 
-    Plotly.newPlot(plotRef.current, traces, layout, { responsive: true, displaylogo: false });
+    Plotly.newPlot(node, traces, layout, { responsive: true, displaylogo: false });
+    return () => { if (node) Plotly.purge(node); };
   }, [subTab, odeExpr]);
 
   return (

@@ -35,11 +35,7 @@ export function sampleFunction2D(exprString, xMin = -10, xMax = 10, points = 500
 
         if (typeof y === 'number' && !isNaN(y) && isFinite(y)) {
           // Asymptote threshold check (e.g. for tan(x) or 1/x)
-          if (Math.abs(y) > 30) {
-            xValues.push(x);
-            yValues.push(null);
-            prevY = null;
-          } else if (prevY !== null && Math.abs(y - prevY) > 25 && (y * prevY < 0)) {
+          if (prevY !== null && Math.abs(y - prevY) > 100 && (y * prevY < 0)) {
             // Discontinuity jump across vertical asymptote (sign flip + huge jump)
             xValues.push(x);
             yValues.push(null);
@@ -561,11 +557,23 @@ export function solveEquationStepByStep(inputQuery) {
 
     // Extract Quadratic Coefficients: a*x^2 + b*x + c = 0
     try {
-      const compiled = math.compile(simplifiedLHS ? simplifiedLHS.toString() : targetExprStr);
+      const exprToParse = simplifiedLHS ? simplifiedLHS.toString() : targetExprStr;
+      const compiled = math.compile(exprToParse);
+      
+      let isPolynomial = true;
+      try {
+        math.parse(exprToParse).traverse(function (node) {
+          if (node.isFunctionNode) isPolynomial = false;
+          if (node.isOperatorNode && !['+', '-', '*', '/', '^'].includes(node.op)) isPolynomial = false;
+        });
+      } catch (e) {
+        isPolynomial = false;
+      }
       
       const f0 = compiled.evaluate({ x: 0 });
       const f1 = compiled.evaluate({ x: 1 });
       const f_neg1 = compiled.evaluate({ x: -1 });
+      const f2 = compiled.evaluate({ x: 2 });
 
       if (typeof f0 === 'number' && typeof f1 === 'number' && typeof f_neg1 === 'number' &&
           !isNaN(f0) && !isNaN(f1) && !isNaN(f_neg1)) {
@@ -573,6 +581,77 @@ export function solveEquationStepByStep(inputQuery) {
         const c = f0;
         const a = (f1 + f_neg1 - 2 * f0) / 2;
         const b = (f1 - f_neg1) / 2;
+
+        let degreeAtMost2 = false;
+        if (typeof f2 === 'number' && !isNaN(f2)) {
+          const expectedF2 = a * 4 + b * 2 + c;
+          if (Math.abs(f2 - expectedF2) < 1e-6) {
+            degreeAtMost2 = true;
+          }
+        }
+
+        if (!isPolynomial || !degreeAtMost2) {
+          steps.push({
+            title: 'Step 3: Non-Polynomial Detected',
+            latex: '\\text{Use Numerical Bisection}',
+            explanation: 'The equation is not a simple linear or quadratic polynomial. Falling back to numerical bisection search.'
+          });
+          
+          const roots = [];
+          const rangeMin = -10;
+          const rangeMax = 10;
+          const samples = 1000;
+          const step = (rangeMax - rangeMin) / samples;
+          let prevX = rangeMin;
+          let prevY = compiled.evaluate({ x: prevX });
+          for (let i = 1; i <= samples; i++) {
+            const currX = rangeMin + i * step;
+            let currY;
+            try {
+              currY = compiled.evaluate({ x: currX });
+            } catch (e) { continue; }
+            if (typeof prevY === 'number' && typeof currY === 'number' && !isNaN(prevY) && !isNaN(currY)) {
+              if ((prevY < 0 && currY > 0) || (prevY > 0 && currY < 0)) {
+                if (Math.abs(prevY) < 50 && Math.abs(currY) < 50) {
+                  let rMin = prevX;
+                  let rMax = currX;
+                  for (let iter = 0; iter < 20; iter++) {
+                    const mid = (rMin + rMax) / 2;
+                    const midY = compiled.evaluate({ x: mid });
+                    if ((prevY < 0 && midY < 0) || (prevY > 0 && midY > 0)) {
+                      rMin = mid;
+                    } else {
+                      rMax = mid;
+                    }
+                  }
+                  const exactRoot = (rMin + rMax) / 2;
+                  if (Math.abs(compiled.evaluate({ x: exactRoot })) < 0.1) {
+                    roots.push(Number(exactRoot.toFixed(3)));
+                  }
+                }
+              }
+            }
+            prevX = currX;
+            prevY = currY;
+          }
+          
+          if (roots.length > 0) {
+             const solTex = roots.map((r, i) => `x_${i+1} = ${r}`).join(', \\quad ');
+             steps.push({
+               title: 'Step 4: Approximate Numerical Roots',
+               latex: solTex,
+               explanation: 'Found numerical roots in the range [-10, 10] using bisection search.'
+             });
+             return { steps, solutionLatex: solTex, solutionType: 'Numerical Root Finding' };
+          } else {
+             steps.push({
+               title: 'Step 4: Approximate Numerical Roots',
+               latex: '\\text{No real roots found}',
+               explanation: 'No roots detected in the range [-10, 10].'
+             });
+             return { steps, solutionLatex: '\\text{No real roots found}', solutionType: 'Numerical Root Finding' };
+          }
+        }
 
         if (Math.abs(a) > 1e-6) {
           const aRounded = Math.round(a * 1000) / 1000;

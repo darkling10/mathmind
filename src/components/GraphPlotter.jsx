@@ -53,7 +53,8 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
 
   // Re-render Plotly chart
   useEffect(() => {
-    if (!plotContainerRef.current) return;
+    const node = plotContainerRef.current;
+    if (!node) return;
 
     const traces = [];
     let primaryRoots = [];
@@ -162,7 +163,8 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
       modeBarButtonsToRemove: ['lasso2d', 'select2d']
     };
 
-    Plotly.newPlot(plotContainerRef.current, traces, layout, config);
+    Plotly.newPlot(node, traces, layout, config);
+    return () => { if (node) Plotly.purge(node); };
   }, [functions, xRange, params, showRoots, showExtrema, showIntegral, integralBounds, currentTheme]);
 
   return (

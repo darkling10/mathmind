@@ -15,7 +15,8 @@ export default function Graph3DPlotter({ initialEquation = 'cos(sqrt(x^2 + y^2))
   const plotContainerRef = useRef(null);
 
   useEffect(() => {
-    if (!plotContainerRef.current) return;
+    const node = plotContainerRef.current;
+    if (!node) return;
 
     const isLight = currentTheme.mode === 'light';
     let traces = [];
@@ -88,7 +89,8 @@ export default function Graph3DPlotter({ initialEquation = 'cos(sqrt(x^2 + y^2))
       };
     }
 
-    Plotly.newPlot(plotContainerRef.current, traces, layout, { responsive: true, displaylogo: false });
+    Plotly.newPlot(node, traces, layout, { responsive: true, displaylogo: false });
+    return () => { if (node) Plotly.purge(node); };
   }, [plotMode, expr3D, parametricType, vectorFieldP, vectorFieldQ, currentTheme]);
 
   return (

@@ -11,6 +11,7 @@ import DocumentationHub from './components/DocumentationHub';
 import PresetLibrary from './components/PresetLibrary';
 import CheatSheetModal from './components/CheatSheetModal';
 import LoadingScreen from './components/LoadingScreen';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Sparkles, Heart } from 'lucide-react';
 
 export default function App() {
@@ -56,7 +57,7 @@ export default function App() {
   };
 
   return (
-    <>
+    <ErrorBoundary>
       {/* Animated App Preloader Splash Screen */}
       {isLoading && (
         <LoadingScreen onComplete={() => setIsLoading(false)} />
@@ -82,49 +83,57 @@ export default function App() {
           
           {/* Graphing Category */}
           {primaryDomain === 'graphing' && (
-            <>
+            <ErrorBoundary>
               {subTool === '2d' && (
                 <GraphPlotter key={currentEquation2D} initialEquation={currentEquation2D} />
               )}
               {subTool === '3d' && (
                 <Graph3DPlotter key={currentEquation3D} initialEquation={currentEquation3D} />
               )}
-            </>
+            </ErrorBoundary>
           )}
 
           {/* Calculus Category */}
           {primaryDomain === 'calculus' && (
-            <CalculusLab activeSubTool={subTool} />
+            <ErrorBoundary>
+              <CalculusLab activeSubTool={subTool} />
+            </ErrorBoundary>
           )}
 
           {/* Physics & Dynamics Category */}
           {primaryDomain === 'physics' && (
-            <PhysicsSimulator activeSubTool={subTool} />
+            <ErrorBoundary>
+              <PhysicsSimulator activeSubTool={subTool} />
+            </ErrorBoundary>
           )}
 
           {/* Algebra & Solvers Category */}
           {primaryDomain === 'algebra' && (
-            <>
+            <ErrorBoundary>
               {subTool === 'solver' && (
                 <EquationSolver onSendToGraph={(eq) => handleSendToGraph(eq, '2d')} />
               )}
               {subTool === 'matrix' && (
                 <MatrixLab />
               )}
-            </>
+            </ErrorBoundary>
           )}
 
           {/* AI Tutor Category */}
           {primaryDomain === 'ai' && (
-            <AiAssistant onApplyToGraph={(eq, mode) => handleSendToGraph(eq, mode)} />
+            <ErrorBoundary>
+              <AiAssistant onApplyToGraph={(eq, mode) => handleSendToGraph(eq, mode)} />
+            </ErrorBoundary>
           )}
 
           {/* Documentation & User Guide Hub */}
           {primaryDomain === 'docs' && (
-            <DocumentationHub onNavigateToDomain={(domain, sub) => {
-              setPrimaryDomain(domain);
-              if (sub) setSubTool(sub);
-            }} />
+            <ErrorBoundary>
+              <DocumentationHub onNavigateToDomain={(domain, sub) => {
+                setPrimaryDomain(domain);
+                if (sub) setSubTool(sub);
+              }} />
+            </ErrorBoundary>
           )}
 
         </main>
@@ -168,6 +177,6 @@ export default function App() {
         </footer>
 
       </div>
-    </>
+    </ErrorBoundary>
   );
 }

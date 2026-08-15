@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Plotly from 'plotly.js-dist-min';
 import { computeHarmonicOscillator } from '../../services/physicsEngine';
 import { Activity, Sliders, RefreshCw, Zap } from 'lucide-react';
@@ -13,7 +13,10 @@ export default function HarmonicOscillator() {
   const dispPlotRef = useRef(null);
   const phasePlotRef = useRef(null);
 
-  const oscData = computeHarmonicOscillator(mass, damping, stiffness, forceF0, driveOmega, 1.5, 0, 12, 500);
+  const oscData = useMemo(() => 
+    computeHarmonicOscillator(mass, damping, stiffness, forceF0, driveOmega, 1.5, 0, 12, 500),
+    [mass, damping, stiffness, forceF0, driveOmega]
+  );
 
   useEffect(() => {
     if (!dispPlotRef.current || !phasePlotRef.current) return;
@@ -70,7 +73,12 @@ export default function HarmonicOscillator() {
     };
 
     Plotly.newPlot(phasePlotRef.current, phaseTraces, phaseLayout, { responsive: true, displaylogo: false });
-  }, [mass, damping, stiffness, forceF0, driveOmega, oscData]);
+
+    return () => {
+      if (dispPlotRef.current) Plotly.purge(dispPlotRef.current);
+      if (phasePlotRef.current) Plotly.purge(phasePlotRef.current);
+    };
+  }, [oscData]);
 
   return (
     <div className="w-full space-y-6">
