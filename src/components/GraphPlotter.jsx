@@ -169,7 +169,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
     <div className="w-full space-y-6">
       
       {/* Function Control Cards Panel */}
-      <div className="glass-panel p-5 rounded-2xl space-y-4 shadow-xl">
+      <div className="glass-panel p-5 rounded-2xl space-y-4 shadow-xl relative z-30">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/10">
           <div className="flex items-center gap-2.5">
@@ -219,7 +219,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
         {/* Function Inputs List with AutocompleteInput */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {functions.map((func, idx) => (
-            <div key={func.id} className="glass-card p-3 rounded-xl flex items-center gap-3 shadow-sm">
+            <div key={func.id} className="glass-card p-3 rounded-xl flex items-center gap-3 shadow-sm relative z-30">
               <div
                 className="w-4 h-4 rounded-full flex-shrink-0 shadow-md"
                 style={{ backgroundColor: func.color }}
@@ -261,12 +261,12 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
       </div>
 
       {/* Main Interactive Plot Canvas Card */}
-      <div className="glass-panel p-5 rounded-2xl shadow-2xl relative">
+      <div className="glass-panel p-5 rounded-2xl shadow-2xl relative z-10">
         <div ref={plotContainerRef} className="w-full h-[480px]" />
       </div>
 
       {/* Analytics & Live Slider Controls */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 relative z-10">
         
         {/* Card 1: Live Coefficient Sliders */}
         <div className="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">

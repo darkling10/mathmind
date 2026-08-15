@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, CornerDownLeft, XCircle } from 'lucide-react';
+import { CornerDownLeft, XCircle } from 'lucide-react';
 
 const MATH_AUTOCOMPLETE_ITEMS = [
   { token: 'sin', completion: 'sin(x)', desc: 'Sine function' },
@@ -44,19 +44,24 @@ export default function AutocompleteInput({
 
   // Update suggestions based on user input
   const updateSuggestions = (text) => {
-    if (!text || !text.trim()) {
-      // Show top 4 popular items when empty
+    const trimmed = (text || '').trim().toLowerCase();
+
+    if (!trimmed) {
       setSuggestions(MATH_AUTOCOMPLETE_ITEMS.slice(0, 4));
       setSelectedIndex(0);
       return;
     }
 
-    const lower = text.toLowerCase().trim();
-    const matches = MATH_AUTOCOMPLETE_ITEMS.filter(item =>
-      item.token.toLowerCase().includes(lower) ||
-      item.completion.toLowerCase().includes(lower) ||
-      item.desc.toLowerCase().includes(lower)
-    ).slice(0, 5);
+    // Filter out items that are EXACT matches to the input text
+    const matches = MATH_AUTOCOMPLETE_ITEMS.filter(item => {
+      const compLower = item.completion.toLowerCase();
+      if (compLower === trimmed) return false; // Hide exact matches!
+      return (
+        item.token.toLowerCase().includes(trimmed) ||
+        compLower.includes(trimmed) ||
+        item.desc.toLowerCase().includes(trimmed)
+      );
+    }).slice(0, 5);
 
     setSuggestions(matches);
     setSelectedIndex(0);
@@ -67,7 +72,6 @@ export default function AutocompleteInput({
     const val = e.target.value;
     onChange(val);
     updateSuggestions(val);
-    setIsOpen(true);
   };
 
   const handleFocus = () => {
@@ -112,7 +116,7 @@ export default function AutocompleteInput({
   };
 
   return (
-    <div ref={wrapperRef} className="relative w-full">
+    <div ref={wrapperRef} className="relative w-full z-30">
       <div className="relative flex items-center">
         <input
           ref={inputRef}
@@ -137,12 +141,12 @@ export default function AutocompleteInput({
         )}
       </div>
 
-      {/* Autocomplete Suggestions Menu */}
+      {/* Autocomplete Dropdown Popover */}
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1.5 z-50 glass-panel p-1.5 rounded-xl border border-indigo-500/30 shadow-2xl bg-slate-950/95 space-y-1">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 px-2 py-0.5 flex items-center justify-between border-b border-white/10">
+        <div className="absolute top-full left-0 mt-1.5 z-50 p-2 rounded-xl border border-indigo-500/40 shadow-2xl bg-slate-900 text-slate-100 min-w-[320px] max-w-md space-y-1 backdrop-blur-2xl">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 px-2.5 py-1 flex items-center justify-between border-b border-white/10">
             <span>Equation Autocomplete</span>
-            <span className="text-slate-500 font-mono text-[9px]">↑↓ & Tab / Enter</span>
+            <span className="text-slate-400 font-mono text-[9px]">↑↓ & Tab / Enter</span>
           </div>
           {suggestions.map((item, idx) => (
             <div
@@ -151,17 +155,17 @@ export default function AutocompleteInput({
                 e.preventDefault();
                 applySuggestion(item.completion);
               }}
-              className={`px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-between transition-all ${
+              className={`px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between transition-all ${
                 idx === selectedIndex
-                  ? 'bg-indigo-600/40 border border-indigo-400/40 text-cyan-300 font-bold'
-                  : 'hover:bg-white/5 text-slate-300'
+                  ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                  : 'hover:bg-white/10 text-slate-200'
               }`}
             >
               <div className="flex items-center gap-2 font-mono text-xs">
-                <CornerDownLeft className="w-3 h-3 text-cyan-400" />
+                <CornerDownLeft className="w-3.5 h-3.5 text-cyan-400" />
                 <span>{item.completion}</span>
               </div>
-              <span className="text-[10px] text-slate-400 font-sans">{item.desc}</span>
+              <span className="text-[11px] opacity-75 font-sans ml-3">{item.desc}</span>
             </div>
           ))}
         </div>
