@@ -95,14 +95,9 @@ export default function Navbar({
               </div>
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-base font-extrabold tracking-tight whitespace-nowrap">
-                  MathMind <span className="text-indigo-400">AI</span>
-                </h1>
-                <span className="badge-neon text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider">
-                  v2.0
-                </span>
-              </div>
+              <h1 className="text-base font-extrabold tracking-tight whitespace-nowrap">
+                MathMind <span className="text-indigo-400">AI</span>
+              </h1>
               <p className="text-[10px] opacity-60 font-medium whitespace-nowrap">Modular Studio</p>
             </div>
           </div>
