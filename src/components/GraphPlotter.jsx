@@ -3,6 +3,7 @@ import Plotly from 'plotly.js-dist-min';
 import { sampleFunction2D, analyzeFunctionFeatures, computeDefiniteIntegral } from '../services/mathEngine';
 import { Sliders, Activity, Plus, Trash2, Eye, EyeOff, Crosshair, Sparkles } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import AutocompleteInput from './AutocompleteInput';
 
 export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
   const { currentTheme } = useTheme();
@@ -121,7 +122,6 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
     }
 
     const isTanOrDiv = functions.some(f => f.expr.toLowerCase().includes('tan') || f.expr.toLowerCase().includes('1/'));
-
     const isLight = currentTheme.mode === 'light';
 
     const layout = {
@@ -178,7 +178,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
             </div>
             <div>
               <h3 className="text-sm font-extrabold">2D Function Overlay Manager</h3>
-              <p className="text-xs opacity-70">Plot multiple curves and toggle analysis markers</p>
+              <p className="text-xs opacity-70">Plot multiple curves with real-time math equation autocomplete</p>
             </div>
           </div>
 
@@ -216,7 +216,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
           </div>
         </div>
 
-        {/* Function Inputs List */}
+        {/* Function Inputs List with AutocompleteInput */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {functions.map((func, idx) => (
             <div key={func.id} className="glass-card p-3 rounded-xl flex items-center gap-3 shadow-sm">
@@ -227,13 +227,15 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
               <span className="text-xs font-mono font-bold opacity-80 min-w-[50px]">
                 f<sub>{idx + 1}</sub>(x) =
               </span>
-              <input
-                type="text"
-                value={func.expr}
-                onChange={(e) => handleUpdateExpr(func.id, e.target.value)}
-                className="glass-input text-xs font-mono flex-1 py-1.5 px-3 rounded-lg"
-                placeholder="e.g. a * sin(b * x)"
-              />
+
+              <div className="flex-1">
+                <AutocompleteInput
+                  value={func.expr}
+                  onChange={(val) => handleUpdateExpr(func.id, val)}
+                  placeholder="e.g. sin(x), sqrt(x)..."
+                />
+              </div>
+
               <button
                 onClick={() => handleToggleVisible(func.id)}
                 className={`p-1.5 rounded-lg transition-colors ${
