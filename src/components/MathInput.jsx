@@ -3,6 +3,7 @@ import katex from 'katex';
 import { formatLatex } from '../services/mathEngine';
 import VirtualKeyboard from './VirtualKeyboard';
 import { Keyboard, Send, XCircle, CheckCircle2, Sparkles } from 'lucide-react';
+import { FEATURE_FLAGS } from '../config/featureFlags';
 
 export default function MathInput({ value, onChange, onSubmit, label = "Enter Equation or Function", placeholder = "e.g. sin(x) * exp(-0.1 * x)", showAiButton = false, onAiClick }) {
   const [showKeyboard, setShowKeyboard] = useState(false);
@@ -68,7 +69,7 @@ export default function MathInput({ value, onChange, onSubmit, label = "Enter Eq
         </label>
 
         <div className="flex items-center gap-2">
-          {showAiButton && (
+          {showAiButton && FEATURE_FLAGS.ENABLE_AI_FEATURES && (
             <button
               onClick={onAiClick}
               className="text-xs font-bold text-purple-300 hover:text-white bg-purple-500/20 border border-purple-500/40 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-sm"

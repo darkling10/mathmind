@@ -6,11 +6,9 @@ import {
   Sparkles, 
   BookOpen, 
   Layers,
-  BrainCircuit,
-  Box,
-  Grid,
-  ChevronDown
+  BrainCircuit
 } from 'lucide-react';
+import { FEATURE_FLAGS } from '../config/featureFlags';
 
 export default function Navbar({ 
   primaryDomain, 
@@ -21,7 +19,7 @@ export default function Navbar({
   onOpenCheatSheet 
 }) {
   // Primary domain categories
-  const domains = [
+  const allDomains = [
     { 
       id: 'graphing', 
       label: 'Graphing & Geometry', 
@@ -51,15 +49,15 @@ export default function Navbar({
         { id: 'matrix', label: 'Matrix Laboratory' }
       ]
     },
-    { 
+    ...(FEATURE_FLAGS.ENABLE_AI_FEATURES ? [{
       id: 'ai', 
       label: 'AI Tutor', 
       icon: Sparkles,
       subTools: []
-    }
+    }] : [])
   ];
 
-  const currentDomainObj = domains.find(d => d.id === primaryDomain) || domains[0];
+  const currentDomainObj = allDomains.find(d => d.id === primaryDomain) || allDomains[0];
 
   return (
     <header className="w-full sticky top-0 z-50 mb-6 border-b border-white/10 shadow-2xl backdrop-blur-xl bg-slate-950/80">
@@ -89,7 +87,7 @@ export default function Navbar({
 
         {/* Tier 1 Domain Selector Tabs */}
         <nav className="flex items-center bg-slate-900/90 p-1.5 rounded-2xl border border-white/10 shadow-inner overflow-x-auto max-w-full gap-1">
-          {domains.map((domain) => {
+          {allDomains.map((domain) => {
             const Icon = domain.icon;
             const isActive = primaryDomain === domain.id;
             return (
@@ -135,7 +133,7 @@ export default function Navbar({
 
       </div>
 
-      {/* Tier 2: Contextual Sub-Toolbar (Only shown if current domain has subTools) */}
+      {/* Tier 2: Contextual Sub-Toolbar */}
       {currentDomainObj.subTools.length > 0 && (
         <div className="w-full bg-slate-900/60 border-t border-white/5 py-2 px-6">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
