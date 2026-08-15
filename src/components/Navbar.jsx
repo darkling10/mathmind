@@ -6,7 +6,8 @@ import {
   Sparkles, 
   BookOpen, 
   Layers,
-  BrainCircuit
+  BrainCircuit,
+  Zap
 } from 'lucide-react';
 import { FEATURE_FLAGS } from '../config/featureFlags';
 
@@ -38,6 +39,15 @@ export default function Navbar({
         { id: 'riemann', label: 'Riemann Sums' },
         { id: 'taylor', label: 'Taylor Polynomials' },
         { id: 'slope', label: 'ODE Slope Fields' }
+      ]
+    },
+    { 
+      id: 'physics', 
+      label: 'Physics & Dynamics', 
+      icon: Zap,
+      subTools: [
+        { id: 'projectile', label: 'Projectile Trajectory' },
+        { id: 'oscillator', label: 'Harmonic Oscillator' }
       ]
     },
     { 

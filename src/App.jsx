@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import GraphPlotter from './components/GraphPlotter';
 import Graph3DPlotter from './components/Graph3DPlotter';
 import CalculusLab from './components/CalculusLab';
+import PhysicsSimulator from './components/physics/PhysicsSimulator';
 import EquationSolver from './components/EquationSolver';
 import MatrixLab from './components/MatrixLab';
 import AiAssistant from './components/AiAssistant';
@@ -16,7 +17,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Dual-Tier Navigation State
-  const [primaryDomain, setPrimaryDomain] = useState('graphing'); // 'graphing', 'calculus', 'algebra', 'ai'
+  const [primaryDomain, setPrimaryDomain] = useState('graphing'); // 'graphing', 'calculus', 'physics', 'algebra', 'ai'
   const [subTool, setSubTool] = useState('2d');
 
   // Shared active equations
@@ -93,6 +94,11 @@ export default function App() {
           {/* Calculus Category */}
           {primaryDomain === 'calculus' && (
             <CalculusLab activeSubTool={subTool} />
+          )}
+
+          {/* Physics & Dynamics Category */}
+          {primaryDomain === 'physics' && (
+            <PhysicsSimulator activeSubTool={subTool} />
           )}
 
           {/* Algebra & Solvers Category */}
