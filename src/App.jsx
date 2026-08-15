@@ -11,7 +11,7 @@ import DocumentationHub from './components/DocumentationHub';
 import PresetLibrary from './components/PresetLibrary';
 import CheatSheetModal from './components/CheatSheetModal';
 import LoadingScreen from './components/LoadingScreen';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Heart } from 'lucide-react';
 
 export default function App() {
   // Preloader Splash Loading Screen State
@@ -144,14 +144,25 @@ export default function App() {
         )}
 
         {/* Footer */}
-        <footer className="w-full border-t border-white/10 py-6 text-center text-xs text-slate-500 glass-panel mt-auto">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-4 gap-2">
+        <footer className="w-full border-t border-black/10 py-6 text-center text-xs opacity-75 glass-panel mt-auto">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-6 gap-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span className="font-semibold text-slate-400">MathMind AI</span> — Modular Dual-Tier Architecture
+              <Sparkles className="w-4 h-4 text-cyan-500" />
+              <span className="font-semibold">MathMind AI</span> — Modular Mathematical Studio
             </div>
-            <div className="flex items-center gap-1">
-              <span>Powered by Math.js, Plotly WebGL, & KaTeX</span>
+            
+            <div className="flex items-center gap-1.5 font-medium">
+              <span>Made with</span>
+              <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline" />
+              <span>by</span>
+              <a
+                href="https://github.com/darkling10/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold underline hover:text-cyan-400 transition-colors"
+              >
+                Abbas Pathan
+              </a>
             </div>
           </div>
         </footer>
