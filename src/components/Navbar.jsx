@@ -164,7 +164,7 @@ export default function Navbar({
           <div className="w-full bg-slate-900/40 border-t border-white/5 py-1.5 px-6">
             <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
               
-              <div className="flex items-center gap-2 overflow-x-auto">
+              <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
                 <span className="text-[10px] font-bold opacity-50 uppercase tracking-wider whitespace-nowrap">
                   {currentDomainObj.label}:
                 </span>
