@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   LineChart, 
   TrendingUp, 
@@ -8,9 +8,11 @@ import {
   Layers,
   BrainCircuit,
   Zap,
-  HelpCircle
+  HelpCircle,
+  Palette
 } from 'lucide-react';
 import { FEATURE_FLAGS } from '../config/featureFlags';
+import ThemeSelectorModal from './ThemeSelectorModal';
 
 export default function Navbar({ 
   primaryDomain, 
@@ -20,6 +22,8 @@ export default function Navbar({
   onOpenPresets, 
   onOpenCheatSheet 
 }) {
+  const [showThemeModal, setShowThemeModal] = useState(false);
+
   // Primary domain categories
   const allDomains = [
     { 
@@ -77,117 +81,133 @@ export default function Navbar({
   const currentDomainObj = allDomains.find(d => d.id === primaryDomain) || allDomains[0];
 
   return (
-    <header className="w-full sticky top-0 z-50 mb-6 border-b border-white/10 shadow-2xl backdrop-blur-xl bg-slate-950/80">
-      
-      {/* Tier 1: Primary Header Bar */}
-      <div className="max-w-7xl mx-auto px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+    <>
+      <header className="w-full sticky top-0 z-50 mb-6 border-b border-white/10 shadow-2xl backdrop-blur-xl bg-slate-950/80">
         
-        {/* Brand / Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 p-0.5 shadow-lg shadow-indigo-500/30">
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-              <BrainCircuit className="w-5 h-5 text-cyan-400" />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-cyan-300">
-                MathMind <span className="text-indigo-400">AI</span>
-              </h1>
-              <span className="badge-neon text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                v2.0 Pro
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 font-medium">Modular Mathematical Studio</p>
-          </div>
-        </div>
-
-        {/* Tier 1 Domain Selector Tabs */}
-        <nav className="flex items-center bg-slate-900/90 p-1.5 rounded-2xl border border-white/10 shadow-inner overflow-x-auto max-w-full gap-1">
-          {allDomains.map((domain) => {
-            const Icon = domain.icon;
-            const isActive = primaryDomain === domain.id;
-            return (
-              <button
-                key={domain.id}
-                onClick={() => {
-                  setPrimaryDomain(domain.id);
-                  if (domain.subTools.length > 0) {
-                    setSubTool(domain.subTools[0].id);
-                  }
-                }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap ${
-                  isActive
-                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/30'
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-300' : 'text-slate-400'}`} />
-                <span>{domain.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Global Action Buttons */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenPresets}
-            className="btn-secondary text-xs font-bold px-3 py-1.5 flex items-center gap-1.5"
-          >
-            <Layers className="w-3.5 h-3.5 text-purple-400" />
-            <span className="hidden sm:inline">Presets</span>
-          </button>
-
-          <button
-            onClick={onOpenCheatSheet}
-            className="btn-secondary text-xs font-bold px-3 py-1.5 flex items-center gap-1.5"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">Cheatsheet</span>
-          </button>
-        </div>
-
-      </div>
-
-      {/* Tier 2: Contextual Sub-Toolbar */}
-      {currentDomainObj.subTools.length > 0 && (
-        <div className="w-full bg-slate-900/60 border-t border-white/5 py-2 px-6">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                {currentDomainObj.label}:
-              </span>
-              <div className="flex items-center gap-1.5 overflow-x-auto">
-                {currentDomainObj.subTools.map((st) => {
-                  const isSubActive = subTool === st.id;
-                  return (
-                    <button
-                      key={st.id}
-                      onClick={() => setSubTool(st.id)}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                        isSubActive
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm font-bold'
-                          : 'text-slate-400 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      {st.label}
-                    </button>
-                  );
-                })}
+        {/* Tier 1: Primary Header Bar */}
+        <div className="max-w-7xl mx-auto px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+          
+          {/* Brand / Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 p-0.5 shadow-lg shadow-indigo-500/30">
+              <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
+                <BrainCircuit className="w-5 h-5 text-cyan-400" />
               </div>
             </div>
-
-            <div className="hidden lg:flex items-center gap-2 text-[11px] text-slate-400 font-mono">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Workspace Active</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-cyan-300">
+                  MathMind <span className="text-indigo-400">AI</span>
+                </h1>
+                <span className="badge-neon text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  v2.0 Pro
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 font-medium">Modular Mathematical Studio</p>
             </div>
-
           </div>
-        </div>
-      )}
 
-    </header>
+          {/* Tier 1 Domain Selector Tabs */}
+          <nav className="flex items-center bg-slate-900/90 p-1.5 rounded-2xl border border-white/10 shadow-inner overflow-x-auto max-w-full gap-1">
+            {allDomains.map((domain) => {
+              const Icon = domain.icon;
+              const isActive = primaryDomain === domain.id;
+              return (
+                <button
+                  key={domain.id}
+                  onClick={() => {
+                    setPrimaryDomain(domain.id);
+                    if (domain.subTools.length > 0) {
+                      setSubTool(domain.subTools[0].id);
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap ${
+                    isActive
+                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/30'
+                      : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-300' : 'text-slate-400'}`} />
+                  <span>{domain.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Global Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowThemeModal(true)}
+              className="btn-secondary text-xs font-bold px-3 py-1.5 flex items-center gap-1.5"
+              title="Theme Options"
+            >
+              <Palette className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Themes</span>
+            </button>
+
+            <button
+              onClick={onOpenPresets}
+              className="btn-secondary text-xs font-bold px-3 py-1.5 flex items-center gap-1.5"
+            >
+              <Layers className="w-3.5 h-3.5 text-purple-400" />
+              <span className="hidden sm:inline">Presets</span>
+            </button>
+
+            <button
+              onClick={onOpenCheatSheet}
+              className="btn-secondary text-xs font-bold px-3 py-1.5 flex items-center gap-1.5"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Cheatsheet</span>
+            </button>
+          </div>
+
+        </div>
+
+        {/* Tier 2: Contextual Sub-Toolbar */}
+        {currentDomainObj.subTools.length > 0 && (
+          <div className="w-full bg-slate-900/60 border-t border-white/5 py-2 px-6">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  {currentDomainObj.label}:
+                </span>
+                <div className="flex items-center gap-1.5 overflow-x-auto">
+                  {currentDomainObj.subTools.map((st) => {
+                    const isSubActive = subTool === st.id;
+                    return (
+                      <button
+                        key={st.id}
+                        onClick={() => setSubTool(st.id)}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                          isSubActive
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm font-bold'
+                            : 'text-slate-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        {st.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="hidden lg:flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Workspace Active</span>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+      </header>
+
+      {/* Theme Selector Modal */}
+      {showThemeModal && (
+        <ThemeSelectorModal onClose={() => setShowThemeModal(false)} />
+      )}
+    </>
   );
 }
