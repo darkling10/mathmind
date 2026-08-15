@@ -17,33 +17,47 @@ export function formatLatex(expr) {
 
 /**
  * Evaluates a 2D function y = f(x) over a range of x values
+ * Discontinuity & Asymptote Aware: Inserts null at vertical asymptotes to prevent stray vertical lines.
  */
-export function sampleFunction2D(exprString, xMin = -10, xMax = 10, points = 400, scopeVars = {}) {
+export function sampleFunction2D(exprString, xMin = -10, xMax = 10, points = 500, scopeVars = {}) {
   try {
     const compiled = math.compile(exprString);
     const xValues = [];
     const yValues = [];
     const step = (xMax - xMin) / (points - 1);
 
+    let prevY = null;
+
     for (let i = 0; i < points; i++) {
       const x = xMin + i * step;
       try {
         const y = compiled.evaluate({ x, ...scopeVars });
+
         if (typeof y === 'number' && !isNaN(y) && isFinite(y)) {
-          if (Math.abs(y) > 1e4) {
+          // Asymptote threshold check (e.g. for tan(x) or 1/x)
+          if (Math.abs(y) > 30) {
             xValues.push(x);
             yValues.push(null);
+            prevY = null;
+          } else if (prevY !== null && Math.abs(y - prevY) > 25 && (y * prevY < 0)) {
+            // Discontinuity jump across vertical asymptote (sign flip + huge jump)
+            xValues.push(x);
+            yValues.push(null);
+            prevY = null;
           } else {
             xValues.push(x);
             yValues.push(y);
+            prevY = y;
           }
         } else {
           xValues.push(x);
           yValues.push(null);
+          prevY = null;
         }
       } catch (e) {
         xValues.push(x);
         yValues.push(null);
+        prevY = null;
       }
     }
     return { x: xValues, y: yValues, error: null };
@@ -54,7 +68,6 @@ export function sampleFunction2D(exprString, xMin = -10, xMax = 10, points = 400
 
 /**
  * Tangent Line Generator at x = x0
- * Line equation: y = f'(x0) * (x - x0) + f(x0)
  */
 export function computeTangentLine(exprString, x0 = 1, scopeVars = {}) {
   try {
@@ -65,7 +78,7 @@ export function computeTangentLine(exprString, x0 = 1, scopeVars = {}) {
     const y0 = compiled.evaluate({ x: x0, ...scopeVars });
     const slope = derivCompiled.evaluate({ x: x0, ...scopeVars });
 
-    if (typeof y0 !== 'number' || typeof slope !== 'number' || isNaN(y0) || isNaN(slope)) {
+    if (typeof y0 !== 'number' || typeof slope !== 'number' || isNaN(y0) || isNaN(slope) || Math.abs(slope) > 1e4) {
       return { error: 'Undefined derivative or function value at x0' };
     }
 
@@ -106,7 +119,7 @@ export function computeRiemannSum(exprString, a = 0, b = 4, N = 10, method = 'le
       let height = 0;
       try {
         height = compiled.evaluate({ x: xEval });
-        if (typeof height !== 'number' || isNaN(height)) height = 0;
+        if (typeof height !== 'number' || isNaN(height) || Math.abs(height) > 1e3) height = 0;
       } catch (e) {
         height = 0;
       }
@@ -407,6 +420,7 @@ export function computeDefiniteIntegral(exprString, a = 0, b = 1, n = 200) {
 
 /**
  * Find Roots, Critical Points, Extrema for 2D function
+ * Asymptote Filtered: Does NOT misidentify vertical asymptotes as roots!
  */
 export function analyzeFunctionFeatures(exprString, xMin = -10, xMax = 10) {
   try {
@@ -418,7 +432,7 @@ export function analyzeFunctionFeatures(exprString, xMin = -10, xMax = 10) {
 
     const roots = [];
     const extrema = [];
-    const samples = 600;
+    const samples = 800;
     const step = (xMax - xMin) / samples;
 
     let prevX = xMin;
@@ -434,29 +448,43 @@ export function analyzeFunctionFeatures(exprString, xMin = -10, xMax = 10) {
       }
 
       if (typeof prevY === 'number' && typeof currY === 'number' && !isNaN(prevY) && !isNaN(currY)) {
+        // Check for Zero Crossing (Root candidate)
         if ((prevY < 0 && currY > 0) || (prevY > 0 && currY < 0)) {
-          let rMin = prevX;
-          let rMax = currX;
-          for (let iter = 0; iter < 12; iter++) {
-            const mid = (rMin + rMax) / 2;
-            const midY = compiled.evaluate({ x: mid });
-            if ((prevY < 0 && midY < 0) || (prevY > 0 && midY > 0)) {
-              rMin = mid;
-            } else {
-              rMax = mid;
+          // Asymptote Filter: If values near crossing are huge, it's a vertical asymptote, NOT a root!
+          if (Math.abs(prevY) < 15 && Math.abs(currY) < 15) {
+            // Bisection method to pinpoint exact root
+            let rMin = prevX;
+            let rMax = currX;
+            for (let iter = 0; iter < 14; iter++) {
+              const mid = (rMin + rMax) / 2;
+              const midY = compiled.evaluate({ x: mid });
+              if ((prevY < 0 && midY < 0) || (prevY > 0 && midY > 0)) {
+                rMin = mid;
+              } else {
+                rMax = mid;
+              }
+            }
+            const exactRoot = (rMin + rMax) / 2;
+            const evalAtRoot = Math.abs(compiled.evaluate({ x: exactRoot }));
+            if (evalAtRoot < 0.1) {
+              roots.push({ x: Number(exactRoot.toFixed(4)), y: 0 });
             }
           }
-          roots.push({ x: Number(((rMin + rMax) / 2).toFixed(4)), y: 0 });
         }
 
+        // Extrema check
         if (derivCompiled) {
           const dPrev = derivCompiled.evaluate({ x: prevX });
           const dCurr = derivCompiled.evaluate({ x: currX });
           if ((dPrev < 0 && dCurr > 0) || (dPrev > 0 && dCurr < 0)) {
-            const type = dPrev < 0 ? 'Minimum' : 'Maximum';
-            const extX = (prevX + currX) / 2;
-            const extY = compiled.evaluate({ x: extX });
-            extrema.push({ type, x: Number(extX.toFixed(4)), y: Number(extY.toFixed(4)) });
+            if (Math.abs(prevY) < 50 && Math.abs(currY) < 50) {
+              const type = dPrev < 0 ? 'Minimum' : 'Maximum';
+              const extX = (prevX + currX) / 2;
+              const extY = compiled.evaluate({ x: extX });
+              if (typeof extY === 'number' && !isNaN(extY) && Math.abs(extY) < 100) {
+                extrema.push({ type, x: Number(extX.toFixed(4)), y: Number(extY.toFixed(4)) });
+              }
+            }
           }
         }
       }

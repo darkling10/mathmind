@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Plotly from 'plotly.js-dist-min';
 import { sampleFunction2D, analyzeFunctionFeatures, computeDefiniteIntegral } from '../services/mathEngine';
-import { Sliders, Activity, Plus, Trash2, Eye, EyeOff, Crosshair, Sparkles, RefreshCw } from 'lucide-react';
+import { Sliders, Activity, Plus, Trash2, Eye, EyeOff, Crosshair, Sparkles } from 'lucide-react';
 
 export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
   // Functions array
@@ -117,6 +117,9 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
       setIntegralResult(intVal.result);
     }
 
+    // Check if initial curve is tan(x) or 1/x to set initial clean y-axis range
+    const isTanOrDiv = functions.some(f => f.expr.toLowerCase().includes('tan') || f.expr.toLowerCase().includes('1/'));
+
     const layout = {
       autosize: true,
       paper_bgcolor: 'transparent',
@@ -131,6 +134,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
       },
       yaxis: {
         title: { text: 'y = f(x)', font: { color: '#94a3b8', size: 13, family: 'Inter' } },
+        range: isTanOrDiv ? [-10, 10] : undefined,
         gridcolor: 'rgba(255, 255, 255, 0.07)',
         zerolinecolor: 'rgba(255, 255, 255, 0.25)',
         tickfont: { color: '#94a3b8', family: 'Fira Code' }
