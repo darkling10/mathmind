@@ -2,8 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import Plotly from 'plotly.js-dist-min';
 import { sampleFunction2D, analyzeFunctionFeatures, computeDefiniteIntegral } from '../services/mathEngine';
 import { Sliders, Activity, Plus, Trash2, Eye, EyeOff, Crosshair, Sparkles } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
+  const { currentTheme } = useTheme();
+
   // Functions array
   const [functions, setFunctions] = useState([
     { id: '1', expr: initialEquation, color: '#06b6d4', visible: true }
@@ -117,32 +120,33 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
       setIntegralResult(intVal.result);
     }
 
-    // Check if initial curve is tan(x) or 1/x to set initial clean y-axis range
     const isTanOrDiv = functions.some(f => f.expr.toLowerCase().includes('tan') || f.expr.toLowerCase().includes('1/'));
+
+    const isLight = currentTheme.mode === 'light';
 
     const layout = {
       autosize: true,
       paper_bgcolor: 'transparent',
-      plot_bgcolor: 'rgba(10, 15, 28, 0.85)',
+      plot_bgcolor: isLight ? 'rgba(248, 250, 252, 0.95)' : currentTheme.plotlyBg,
       margin: { l: 55, r: 25, t: 30, b: 50 },
       xaxis: {
-        title: { text: 'x', font: { color: '#94a3b8', size: 13, family: 'Inter' } },
+        title: { text: 'x', font: { color: currentTheme.plotlyText, size: 13, family: 'Inter' } },
         range: [xRange.min, xRange.max],
-        gridcolor: 'rgba(255, 255, 255, 0.07)',
-        zerolinecolor: 'rgba(255, 255, 255, 0.25)',
-        tickfont: { color: '#94a3b8', family: 'Fira Code' }
+        gridcolor: currentTheme.plotlyGrid,
+        zerolinecolor: isLight ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.25)',
+        tickfont: { color: currentTheme.plotlyText, family: 'Fira Code' }
       },
       yaxis: {
-        title: { text: 'y = f(x)', font: { color: '#94a3b8', size: 13, family: 'Inter' } },
+        title: { text: 'y = f(x)', font: { color: currentTheme.plotlyText, size: 13, family: 'Inter' } },
         range: isTanOrDiv ? [-10, 10] : undefined,
-        gridcolor: 'rgba(255, 255, 255, 0.07)',
-        zerolinecolor: 'rgba(255, 255, 255, 0.25)',
-        tickfont: { color: '#94a3b8', family: 'Fira Code' }
+        gridcolor: currentTheme.plotlyGrid,
+        zerolinecolor: isLight ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.25)',
+        tickfont: { color: currentTheme.plotlyText, family: 'Fira Code' }
       },
       legend: {
-        font: { color: '#e2e8f0', size: 11, family: 'Inter' },
-        bgcolor: 'rgba(15, 23, 42, 0.9)',
-        bordercolor: 'rgba(255, 255, 255, 0.1)',
+        font: { color: currentTheme.plotlyText, size: 11, family: 'Inter' },
+        bgcolor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.9)',
+        bordercolor: isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
         borderwidth: 1,
         orientation: 'h',
         y: 1.12,
@@ -159,22 +163,22 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
     };
 
     Plotly.newPlot(plotContainerRef.current, traces, layout, config);
-  }, [functions, xRange, params, showRoots, showExtrema, showIntegral, integralBounds]);
+  }, [functions, xRange, params, showRoots, showExtrema, showIntegral, integralBounds, currentTheme]);
 
   return (
     <div className="w-full space-y-6">
       
       {/* Function Control Cards Panel */}
-      <div className="glass-panel p-5 rounded-2xl border border-white/10 space-y-4 shadow-xl">
+      <div className="glass-panel p-5 rounded-2xl space-y-4 shadow-xl">
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/10">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center">
-              <Activity className="w-4 h-4 text-cyan-400" />
+              <Activity className="w-4 h-4 text-cyan-500" />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-white">2D Function Overlay Manager</h3>
-              <p className="text-xs text-slate-400">Plot multiple curves and toggle analysis markers</p>
+              <h3 className="text-sm font-extrabold">2D Function Overlay Manager</h3>
+              <p className="text-xs opacity-70">Plot multiple curves and toggle analysis markers</p>
             </div>
           </div>
 
@@ -183,8 +187,8 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
               onClick={() => setShowRoots(!showRoots)}
               className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
                 showRoots
-                  ? 'bg-red-500/20 text-red-300 border-red-500/40 shadow-sm'
-                  : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
+                  ? 'bg-red-500/20 text-red-500 border-red-500/40 shadow-sm'
+                  : 'bg-black/5 opacity-70 hover:opacity-100'
               }`}
             >
               Roots (Zeros)
@@ -194,8 +198,8 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
               onClick={() => setShowExtrema(!showExtrema)}
               className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
                 showExtrema
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
-                  : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
+                  ? 'bg-amber-500/20 text-amber-500 border-amber-500/40 shadow-sm'
+                  : 'bg-black/5 opacity-70 hover:opacity-100'
               }`}
             >
               Extrema (Min/Max)
@@ -206,7 +210,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
               disabled={functions.length >= 4}
               className="btn-secondary text-xs font-bold py-1.5 px-3 flex items-center gap-1.5"
             >
-              <Plus className="w-4 h-4 text-cyan-400" />
+              <Plus className="w-4 h-4 text-cyan-500" />
               <span>Add Curve</span>
             </button>
           </div>
@@ -215,25 +219,25 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
         {/* Function Inputs List */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {functions.map((func, idx) => (
-            <div key={func.id} className="glass-card p-3 rounded-xl flex items-center gap-3 border border-white/10 shadow-sm">
+            <div key={func.id} className="glass-card p-3 rounded-xl flex items-center gap-3 shadow-sm">
               <div
                 className="w-4 h-4 rounded-full flex-shrink-0 shadow-md"
                 style={{ backgroundColor: func.color }}
               />
-              <span className="text-xs font-mono font-bold text-slate-300 min-w-[50px]">
+              <span className="text-xs font-mono font-bold opacity-80 min-w-[50px]">
                 f<sub>{idx + 1}</sub>(x) =
               </span>
               <input
                 type="text"
                 value={func.expr}
                 onChange={(e) => handleUpdateExpr(func.id, e.target.value)}
-                className="glass-input text-xs font-mono flex-1 py-1.5 px-3 rounded-lg border border-white/10"
+                className="glass-input text-xs font-mono flex-1 py-1.5 px-3 rounded-lg"
                 placeholder="e.g. a * sin(b * x)"
               />
               <button
                 onClick={() => handleToggleVisible(func.id)}
                 className={`p-1.5 rounded-lg transition-colors ${
-                  func.visible ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-white/5 text-slate-500'
+                  func.visible ? 'bg-cyan-500/20 text-cyan-500' : 'opacity-40'
                 }`}
                 title={func.visible ? "Hide curve" : "Show curve"}
               >
@@ -242,7 +246,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
               {functions.length > 1 && (
                 <button
                   onClick={() => handleRemoveFunction(func.id)}
-                  className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                  className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
                   title="Remove curve"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -255,7 +259,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
       </div>
 
       {/* Main Interactive Plot Canvas Card */}
-      <div className="glass-panel p-5 rounded-2xl border border-indigo-500/20 shadow-2xl relative">
+      <div className="glass-panel p-5 rounded-2xl shadow-2xl relative">
         <div ref={plotContainerRef} className="w-full h-[480px]" />
       </div>
 
@@ -263,20 +267,20 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         
         {/* Card 1: Live Coefficient Sliders */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 space-y-4 shadow-lg">
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+        <div className="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
+          <div className="flex items-center justify-between pb-2 border-b border-black/10">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-indigo-500 flex items-center gap-2">
               <Sliders className="w-4 h-4" /> Live Parameters
             </h4>
-            <span className="text-[10px] text-slate-400 font-mono">Real-time morph</span>
+            <span className="text-[10px] opacity-70 font-mono">Real-time morph</span>
           </div>
 
           <div className="space-y-3.5">
             {Object.keys(params).map((pKey) => (
               <div key={pKey} className="space-y-1.5">
                 <div className="flex justify-between items-center text-xs font-mono">
-                  <span className="text-slate-300 font-bold">{pKey}</span>
-                  <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-cyan-300 font-bold border border-indigo-500/30">
+                  <span className="font-bold">{pKey}</span>
+                  <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-500 font-bold border border-indigo-500/30">
                     {params[pKey]}
                   </span>
                 </div>
@@ -295,18 +299,18 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
         </div>
 
         {/* Card 2: Roots & Extrema Inspector */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 space-y-4 shadow-lg">
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+        <div className="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
+          <div className="flex items-center justify-between pb-2 border-b border-black/10">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-2">
               <Crosshair className="w-4 h-4" /> Feature Inspector
             </h4>
-            <span className="text-[10px] text-slate-400 font-mono">Calculated roots</span>
+            <span className="text-[10px] opacity-70 font-mono">Calculated roots</span>
           </div>
           
           <div className="space-y-3 max-h-[190px] overflow-y-auto pr-1">
             {analysis.roots.length > 0 && (
               <div>
-                <span className="text-[11px] font-bold text-red-400 uppercase tracking-wide">Roots (x-intercepts):</span>
+                <span className="text-[11px] font-bold text-red-500 uppercase tracking-wide">Roots (x-intercepts):</span>
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {analysis.roots.map((r, i) => (
                     <span key={i} className="badge-neon text-xs font-mono font-bold px-2.5 py-1 rounded-lg">
@@ -319,12 +323,12 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
 
             {analysis.extrema.length > 0 && (
               <div>
-                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wide">Local Extrema:</span>
+                <span className="text-[11px] font-bold text-amber-500 uppercase tracking-wide">Local Extrema:</span>
                 <div className="space-y-1.5 mt-1.5">
                   {analysis.extrema.map((e, i) => (
-                    <div key={i} className="text-xs font-mono flex justify-between text-slate-200 bg-slate-900/80 p-2 rounded-lg border border-white/5">
-                      <span className="font-semibold text-amber-300">{e.type}:</span>
-                      <span className="text-cyan-300 font-bold">({e.x}, {e.y})</span>
+                    <div key={i} className="text-xs font-mono flex justify-between glass-card p-2 rounded-lg">
+                      <span className="font-semibold text-amber-500">{e.type}:</span>
+                      <span className="font-bold">({e.x}, {e.y})</span>
                     </div>
                   ))}
                 </div>
@@ -332,23 +336,23 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
             )}
 
             {analysis.roots.length === 0 && analysis.extrema.length === 0 && (
-              <p className="text-xs text-slate-400 italic pt-2">No real roots or extrema detected in range.</p>
+              <p className="text-xs opacity-70 italic pt-2">No real roots or extrema detected in range.</p>
             )}
           </div>
         </div>
 
         {/* Card 3: Definite Integral Calculator */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 space-y-4 shadow-lg">
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-purple-400 flex items-center gap-2">
+        <div className="glass-panel p-5 rounded-2xl space-y-4 shadow-lg">
+          <div className="flex items-center justify-between pb-2 border-b border-black/10">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-purple-500 flex items-center gap-2">
               <Sparkles className="w-4 h-4" /> Area Integration
             </h4>
             <button
               onClick={() => setShowIntegral(!showIntegral)}
               className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-all ${
                 showIntegral
-                  ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
-                  : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
+                  ? 'bg-purple-500/20 text-purple-500 border-purple-500/40 shadow-sm'
+                  : 'bg-black/5 opacity-70 hover:opacity-100'
               }`}
             >
               {showIntegral ? 'Hide Shading' : 'Shade Area'}
@@ -357,7 +361,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Lower Bound (a)</label>
+              <label className="text-[10px] opacity-70 uppercase font-bold tracking-wider">Lower Bound (a)</label>
               <input
                 type="number"
                 value={integralBounds.a}
@@ -366,7 +370,7 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Upper Bound (b)</label>
+              <label className="text-[10px] opacity-70 uppercase font-bold tracking-wider">Upper Bound (b)</label>
               <input
                 type="number"
                 value={integralBounds.b}
@@ -378,8 +382,8 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
 
           {showIntegral && integralResult !== null && (
             <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-xl text-center shadow-inner">
-              <span className="text-[11px] text-purple-300 font-bold uppercase tracking-wider">Definite Integral Result</span>
-              <div className="text-sm font-mono font-extrabold text-cyan-300 mt-0.5">
+              <span className="text-[11px] text-purple-500 font-bold uppercase tracking-wider">Definite Integral Result</span>
+              <div className="text-sm font-mono font-extrabold text-indigo-500 mt-0.5">
                 ∫<sub>{integralBounds.a}</sub><sup>{integralBounds.b}</sup> f(x)dx = {integralResult}
               </div>
             </div>

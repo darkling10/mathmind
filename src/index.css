@@ -7,41 +7,68 @@
   --font-heading: 'Outfit', sans-serif;
   --font-mono: 'Fira Code', monospace;
 
-  /* Default Dark Tokens */
+  /* Default Midnight Neon Dark */
   --bg-main: #030712;
+  --nav-bg: rgba(3, 7, 18, 0.85);
+  --subnav-bg: rgba(15, 23, 42, 0.7);
   --text-main: #f3f4f6;
+  --text-muted: #94a3b8;
+  --text-heading: #ffffff;
   --card-bg: rgba(15, 23, 42, 0.75);
-  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(15, 23, 42, 0.9);
+  --shadow-color: rgba(0, 0, 0, 0.4);
 }
 
-/* Light Mode Overrides */
+/* True Light Mode Overrides */
 [data-mode="light"] {
   --bg-main: #f8fafc;
-  --text-main: #0f172a;
-  --card-bg: rgba(255, 255, 255, 0.85);
-  --card-border: rgba(0, 0, 0, 0.1);
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --subnav-bg: rgba(241, 245, 249, 0.85);
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-heading: #0f172a;
+  --card-bg: #ffffff;
+  --card-border: rgba(203, 213, 225, 0.8);
+  --input-bg: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.06);
 }
 
-/* Theme-specific Backdrops */
+/* Theme-specific Overrides */
 [data-theme="dark-synthwave"] {
   --bg-main: #0f051d;
+  --nav-bg: rgba(15, 5, 29, 0.85);
+  --subnav-bg: rgba(24, 10, 45, 0.7);
   --text-main: #f5f3ff;
+  --text-muted: #c084fc;
+  --text-heading: #ffffff;
   --card-bg: rgba(24, 10, 45, 0.8);
-  --card-border: rgba(236, 72, 153, 0.2);
+  --card-border: rgba(236, 72, 153, 0.25);
+  --input-bg: rgba(24, 10, 45, 0.9);
 }
 
 [data-theme="dark-emerald"] {
   --bg-main: #021812;
+  --nav-bg: rgba(2, 24, 18, 0.85);
+  --subnav-bg: rgba(6, 38, 30, 0.7);
   --text-main: #ecfdf5;
+  --text-muted: #6ee7b7;
+  --text-heading: #ffffff;
   --card-bg: rgba(6, 38, 30, 0.8);
-  --card-border: rgba(16, 185, 129, 0.2);
+  --card-border: rgba(16, 185, 129, 0.25);
+  --input-bg: rgba(6, 38, 30, 0.9);
 }
 
 [data-theme="light-ocean"] {
   --bg-main: #f0f9ff;
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --subnav-bg: rgba(224, 242, 254, 0.85);
   --text-main: #0c4a6e;
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(14, 165, 233, 0.2);
+  --text-muted: #0284c7;
+  --text-heading: #0369a1;
+  --card-bg: #ffffff;
+  --card-border: rgba(186, 230, 253, 0.8);
+  --input-bg: #ffffff;
 }
 
 body {
@@ -58,28 +85,30 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 40px -15px var(--shadow-color);
+  color: var(--text-main);
 }
 
 .glass-card {
   background: var(--card-bg);
   backdrop-filter: blur(12px);
   border: 1px solid var(--card-border);
+  color: var(--text-main);
+  box-shadow: 0 4px 12px var(--shadow-color);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-input {
-  background: var(--card-bg);
+  background: var(--input-bg);
   border: 1px solid var(--card-border);
   color: var(--text-main);
   outline: none;
   transition: all 0.2s ease;
 }
 
-[data-mode="light"] .glass-input {
-  background: rgba(255, 255, 255, 0.95);
-  color: #0f172a;
-  border-color: rgba(0, 0, 0, 0.15);
+.glass-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 [data-mode="light"] .katex {
@@ -113,32 +142,48 @@ body {
   transition: all 0.2s ease;
 }
 
+.btn-secondary:hover {
+  border-color: #6366f1;
+}
+
 /* Badges */
 .badge-neon {
   background: rgba(99, 102, 241, 0.15);
   border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #6366f1;
+}
+
+[data-mode="dark"] .badge-neon {
   color: #818cf8;
 }
 
 .badge-cyan {
   background: rgba(6, 182, 212, 0.15);
   border: 1px solid rgba(6, 182, 212, 0.3);
+  color: #0284c7;
+}
+
+[data-mode="dark"] .badge-cyan {
   color: #22d3ee;
 }
 
 .badge-purple {
   background: rgba(168, 85, 247, 0.15);
   border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #9333ea;
+}
+
+[data-mode="dark"] .badge-purple {
   color: #c084fc;
 }
 
-/* Custom Sliders */
+/* Custom Range Sliders */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
   height: 6px;
-  background: rgba(128, 128, 128, 0.2);
+  background: rgba(128, 128, 128, 0.25);
   border-radius: 3px;
   outline: none;
 }
@@ -149,9 +194,9 @@ input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #06b6d4;
+  background: #4f46e5;
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.8);
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.6);
   transition: transform 0.15s ease;
 }
 
