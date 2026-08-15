@@ -69,7 +69,6 @@ export function computeTangentLine(exprString, x0 = 1, scopeVars = {}) {
       return { error: 'Undefined derivative or function value at x0' };
     }
 
-    // Tangent equation string: slope * (x - x0) + y0
     const tangentExpr = `${slope} * (x - ${x0}) + ${y0}`;
     const derivTex = derivNode.toTex();
 
@@ -88,14 +87,13 @@ export function computeTangentLine(exprString, x0 = 1, scopeVars = {}) {
 
 /**
  * Riemann Sums Approximation (Left, Right, Midpoint, Trapezoidal)
- * Returns rectangular bar coordinates for Plotly shape drawing
  */
 export function computeRiemannSum(exprString, a = 0, b = 4, N = 10, method = 'left') {
   try {
     const compiled = math.compile(exprString);
     const dx = (b - a) / N;
     let sumArea = 0;
-    const bars = []; // Array of bar shapes for graph visualization
+    const bars = [];
 
     for (let i = 0; i < N; i++) {
       const xLeft = a + i * dx;
@@ -151,15 +149,12 @@ export function computeRiemannSum(exprString, a = 0, b = 4, N = 10, method = 'le
 
 /**
  * Taylor Series Polynomial Expansion Generator
- * P_n(x) = f(a) + f'(a)(x-a) + f''(a)/2! (x-a)^2 + ...
  */
 export function computeTaylorSeries(exprString, center = 0, order = 4) {
   try {
-    // Generate Taylor series terms for common function presets or general math derivatives
     let currentExpr = exprString;
     const terms = [];
     let scope = { x: center };
-    const compiledBase = math.compile(exprString);
     let factorial = 1;
 
     for (let k = 0; k <= order; k++) {
@@ -178,7 +173,6 @@ export function computeTaylorSeries(exprString, center = 0, order = 4) {
         terms.push({ k, val, coeff: Number(coeff.toFixed(4)) });
       }
 
-      // Next derivative
       try {
         currentExpr = math.derivative(currentExpr, 'x').toString();
       } catch (e) {
@@ -186,7 +180,6 @@ export function computeTaylorSeries(exprString, center = 0, order = 4) {
       }
     }
 
-    // Build polynomial string
     const polyParts = terms.map(t => {
       if (t.k === 0) return `${t.coeff}`;
       const powerTerm = center === 0 ? `x^${t.k}` : `(x - ${center})^${t.k}`;
@@ -226,8 +219,6 @@ export function sampleSlopeField(odeExpr = 'x - y', gridRes = 16, range = 4) {
           if (typeof dy_dx === 'number' && !isNaN(dy_dx)) {
             xCoords.push(x);
             yCoords.push(y);
-            
-            // Vector components with slope = dy/dx
             const angle = Math.atan(dy_dx);
             const len = step * 0.4;
             uComp.push(Math.cos(angle) * len);
@@ -480,58 +471,164 @@ export function analyzeFunctionFeatures(exprString, xMin = -10, xMax = 10) {
 }
 
 /**
- * Step-by-Step Solver for Polynomials, Linear Systems & Calculus
+ * Robust Step-by-Step Symbolic & Polynomial Equation Solver
  */
 export function solveEquationStepByStep(inputQuery) {
   const steps = [];
-  const cleanInput = inputQuery.trim().replace(/\s+/g, ' ');
+  const cleanInput = inputQuery.trim();
 
-  try {
-    if (cleanInput.includes('^2') && cleanInput.includes('=')) {
+  // 1. Check Derivative Query
+  if (cleanInput.startsWith('d/dx') || cleanInput.toLowerCase().includes('derivative')) {
+    const exprStr = cleanInput.replace(/d\/dx|derivative of|derivative/gi, '').trim();
+    const res = computeDerivative(exprStr || 'x^2');
+    if (!res.error) {
       steps.push({
-        title: 'Step 1: Identify Equation Form',
-        latex: formatLatex(cleanInput),
-        explanation: 'Recognized standard quadratic form: a x^2 + b x + c = 0.'
+        title: 'Step 1: Identify Function for Differentiation',
+        latex: `f(x) = ${formatLatex(exprStr)}`,
+        explanation: 'Target function to differentiate with respect to x.'
       });
-
-      const side = cleanInput.split('=');
-      const expr = math.parse(`${side[0]} - (${side[1]})`);
-      const simplified = math.simplify(expr);
-
       steps.push({
-        title: 'Step 2: Simplify and Bring to Standard Form',
-        latex: `${simplified.toTex()} = 0`,
-        explanation: 'Re-arranged terms to isolate zero on the right-hand side.'
+        title: 'Step 2: Apply Differentiation Rules',
+        latex: `\\frac{d}{dx}\\left(${formatLatex(exprStr)}\\right)`,
+        explanation: 'Apply calculus rules (power rule, product rule, chain rule).'
       });
-
       steps.push({
-        title: 'Step 3: Calculate Discriminant (\\Delta)',
-        latex: `\\Delta = b^2 - 4ac`,
-        explanation: 'The discriminant determines the nature of the roots (real or complex).'
+        title: 'Step 3: Simplified Derivative Output',
+        latex: res.derivativeTex,
+        explanation: 'Group like terms and factor multipliers.'
       });
-    } else if (cleanInput.startsWith('d/dx') || cleanInput.includes('derivative')) {
-      const exprStr = cleanInput.replace('d/dx', '').replace('derivative', '').trim();
-      const res = computeDerivative(exprStr);
-      if (!res.error) {
-        steps.push({
-          title: 'Step 1: Apply Differentiation Rules',
-          latex: `\\frac{d}{dx}\\left(${formatLatex(exprStr)}\\right)`,
-          explanation: 'Identify composite functions and apply product/chain/power rules.'
-        });
-        steps.push({
-          title: 'Step 2: Simplify Result',
-          latex: res.derivativeTex,
-          explanation: 'Group terms and factor common multipliers.'
-        });
-        return { steps, solutionLatex: res.derivativeTex, solutionType: 'Derivative' };
-      }
+      return { steps, solutionLatex: res.derivativeTex, solutionType: 'Derivative' };
     }
-  } catch (e) {}
+  }
 
+  // 2. Handle Equations containing '=' (e.g. LHS = RHS)
+  if (cleanInput.includes('=')) {
+    const parts = cleanInput.split('=');
+    const lhsRaw = parts[0].trim();
+    const rhsRaw = parts[1].trim();
+
+    steps.push({
+      title: 'Step 1: Input Equation',
+      latex: `${formatLatex(lhsRaw)} = ${formatLatex(rhsRaw)}`,
+      explanation: 'Identified equation with left-hand and right-hand sides.'
+    });
+
+    let targetExprStr = `${lhsRaw} - (${rhsRaw})`;
+    let simplifiedLHS = null;
+
+    try {
+      simplifiedLHS = math.simplify(targetExprStr);
+    } catch (e) {
+      targetExprStr = lhsRaw;
+      try { simplifiedLHS = math.simplify(lhsRaw); } catch (err) {}
+    }
+
+    const lhsTex = simplifiedLHS ? simplifiedLHS.toTex() : formatLatex(targetExprStr);
+
+    steps.push({
+      title: 'Step 2: Transform to Standard Zero Form',
+      latex: `${lhsTex} = 0`,
+      explanation: 'Subtracted right-hand side to establish zero-form equation: f(x) = 0.'
+    });
+
+    // Extract Quadratic Coefficients: a*x^2 + b*x + c = 0
+    try {
+      const compiled = math.compile(simplifiedLHS ? simplifiedLHS.toString() : targetExprStr);
+      
+      const f0 = compiled.evaluate({ x: 0 });
+      const f1 = compiled.evaluate({ x: 1 });
+      const f_neg1 = compiled.evaluate({ x: -1 });
+
+      if (typeof f0 === 'number' && typeof f1 === 'number' && typeof f_neg1 === 'number' &&
+          !isNaN(f0) && !isNaN(f1) && !isNaN(f_neg1)) {
+        
+        const c = f0;
+        const a = (f1 + f_neg1 - 2 * f0) / 2;
+        const b = (f1 - f_neg1) / 2;
+
+        if (Math.abs(a) > 1e-6) {
+          const aRounded = Math.round(a * 1000) / 1000;
+          const bRounded = Math.round(b * 1000) / 1000;
+          const cRounded = Math.round(c * 1000) / 1000;
+
+          steps.push({
+            title: 'Step 3: Identify Quadratic Coefficients',
+            latex: `a = ${aRounded}, \\quad b = ${bRounded}, \\quad c = ${cRounded}`,
+            explanation: 'Extracted standard polynomial terms: a x^2 + b x + c = 0.'
+          });
+
+          const delta = bRounded * bRounded - 4 * aRounded * cRounded;
+          const deltaRounded = Math.round(delta * 1000) / 1000;
+
+          steps.push({
+            title: 'Step 4: Compute Discriminant (\\Delta)',
+            latex: `\\Delta = b^2 - 4ac = (${bRounded})^2 - 4(${aRounded})(${cRounded}) = ${deltaRounded}`,
+            explanation: deltaRounded > 0 
+              ? 'Discriminant is positive (\\Delta > 0), giving two distinct real roots.'
+              : deltaRounded === 0 
+              ? 'Discriminant is zero (\\Delta = 0), giving one repeated real root.'
+              : 'Discriminant is negative (\\Delta < 0), giving complex conjugate roots.'
+          });
+
+          if (deltaRounded >= 0) {
+            const x1 = (-bRounded + Math.sqrt(deltaRounded)) / (2 * aRounded);
+            const x2 = (-bRounded - Math.sqrt(deltaRounded)) / (2 * aRounded);
+            const x1R = Math.round(x1 * 1000) / 1000;
+            const x2R = Math.round(x2 * 1000) / 1000;
+
+            const solTex = x1R === x2R ? `x = ${x1R}` : `x_1 = ${x1R}, \\quad x_2 = ${x2R}`;
+
+            steps.push({
+              title: 'Step 5: Apply Quadratic Formula',
+              latex: `x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a} \\implies ${solTex}`,
+              explanation: 'Substituted coefficients into the quadratic formula to calculate roots.'
+            });
+
+            return { steps, solutionLatex: solTex, solutionType: 'Quadratic Equation' };
+          } else {
+            const realPart = (-bRounded / (2 * aRounded)).toFixed(3);
+            const imagPart = (Math.sqrt(-deltaRounded) / (2 * aRounded)).toFixed(3);
+            const solTex = `x = ${realPart} \\pm ${imagPart}i`;
+
+            steps.push({
+              title: 'Step 5: Complex Conjugate Solutions',
+              latex: `x = \\frac{-b \\pm i\\sqrt{|\\Delta|}}{2a} \\implies ${solTex}`,
+              explanation: 'Calculated complex conjugate roots using imaginary unit i.'
+            });
+
+            return { steps, solutionLatex: solTex, solutionType: 'Quadratic (Complex Roots)' };
+          }
+        }
+
+        if (Math.abs(a) <= 1e-6 && Math.abs(b) > 1e-6) {
+          const bRounded = Math.round(b * 1000) / 1000;
+          const cRounded = Math.round(c * 1000) / 1000;
+          const rootX = -cRounded / bRounded;
+          const rootXRounded = Math.round(rootX * 1000) / 1000;
+
+          steps.push({
+            title: 'Step 3: Isolate Variable x',
+            latex: `${bRounded}x = ${-cRounded} \\implies x = \\frac{${-cRounded}}{${bRounded}} = ${rootXRounded}`,
+            explanation: 'Linear equation solved by isolating variable x.'
+          });
+
+          return { steps, solutionLatex: `x = ${rootXRounded}`, solutionType: 'Linear Equation' };
+        }
+      }
+    } catch (e) {}
+
+    return {
+      steps,
+      solutionLatex: `${lhsTex} = 0`,
+      solutionType: 'Symbolic Equation'
+    };
+  }
+
+  // 3. Expressions without '=' (Simplification)
   steps.push({
-    title: 'Step 1: Parse and Structure Input',
+    title: 'Step 1: Input Expression',
     latex: formatLatex(cleanInput),
-    explanation: 'Parsed expression into symbolic node tree.'
+    explanation: 'Target algebraic expression for symbolic simplification.'
   });
 
   try {
@@ -539,7 +636,7 @@ export function solveEquationStepByStep(inputQuery) {
     steps.push({
       title: 'Step 2: Symbolic Simplification',
       latex: simplified.toTex(),
-      explanation: 'Applied algebraic identity transformations and combined like terms.'
+      explanation: 'Combined like terms and applied algebraic identity reductions.'
     });
 
     return {
@@ -549,7 +646,7 @@ export function solveEquationStepByStep(inputQuery) {
     };
   } catch (err) {
     return {
-      steps: [{ title: 'Error', latex: cleanInput, explanation: err.message }],
+      steps: [{ title: 'Error', latex: formatLatex(cleanInput), explanation: err.message }],
       solutionLatex: null,
       error: err.message
     };
