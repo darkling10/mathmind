@@ -221,14 +221,16 @@ export default function GraphPlotter({ initialEquation = '2 * sin(x)' }) {
         {/* Function Inputs List with AutocompleteInput */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {functions.map((func, idx) => (
-            <div key={func.id} className="glass-card p-3 rounded-xl flex items-center gap-3 shadow-sm relative z-30">
-              <div
-                className="w-4 h-4 rounded-full flex-shrink-0 shadow-md"
-                style={{ backgroundColor: func.color }}
-              />
-              <span className="text-xs font-mono font-bold opacity-80 min-w-[50px]">
-                f<sub>{idx + 1}</sub>(x) =
-              </span>
+            <div key={func.id} className="glass-card p-3 rounded-xl flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 shadow-sm relative z-30">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded-full flex-shrink-0 shadow-md"
+                  style={{ backgroundColor: func.color }}
+                />
+                <span className="text-xs font-mono font-bold opacity-80 min-w-[50px]">
+                  f<sub>{idx + 1}</sub>(x) =
+                </span>
+              </div>
 
               <div className="flex-1">
                 <AutocompleteInput

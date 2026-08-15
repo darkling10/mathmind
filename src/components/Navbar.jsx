@@ -85,7 +85,7 @@ export default function Navbar({
       <header className="w-full sticky top-0 z-50 mb-6 border-b border-black/10 shadow-lg backdrop-blur-xl bg-slate-950/80 transition-colors duration-300">
         
         {/* Tier 1: Primary Header Bar */}
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-4">
           
           {/* Brand / Logo */}
           <div className="flex items-center gap-3 shrink-0">
@@ -103,7 +103,7 @@ export default function Navbar({
           </div>
 
           {/* Tier 1 Domain Selector Tabs */}
-          <nav className="flex items-center bg-slate-900/60 p-1 rounded-xl border border-white/5 overflow-x-auto gap-1">
+          <nav className="flex items-center bg-slate-900/60 p-1 rounded-xl border border-white/5 overflow-x-auto gap-1 w-full lg:w-auto order-last lg:order-none mt-2 lg:mt-0 hide-scrollbar">
             {allDomains.map((domain) => {
               const Icon = domain.icon;
               const isActive = primaryDomain === domain.id;

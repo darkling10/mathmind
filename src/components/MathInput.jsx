@@ -156,7 +156,7 @@ export default function MathInput({
 
   return (
     <div className="w-full relative space-y-2.5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <label className="text-xs font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-2.5">
           <span>{label}</span>
           {isValid ? (
@@ -196,8 +196,8 @@ export default function MathInput({
       </div>
 
       {/* Main Input Control Row */}
-      <div className="flex items-center gap-2.5">
-        <div className="relative flex-1">
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
+        <div className="relative w-full sm:flex-1">
           <input
             ref={inputRef}
             type="text"
@@ -254,7 +254,7 @@ export default function MathInput({
 
         <button
           onClick={onSubmit}
-          className="btn-neon px-5 py-3 text-xs font-bold flex items-center gap-2 shadow-lg"
+          className="btn-neon px-5 py-3 text-xs font-bold flex items-center justify-center gap-2 shadow-lg w-full sm:w-auto"
         >
           <span>Evaluate</span>
           <Send className="w-4 h-4" />
