@@ -69,19 +69,21 @@ export default function Graph3DPlotter({ initialEquation = 'cos(sqrt(x^2 + y^2))
       };
     } else if (plotMode === 'vector') {
       const vf = sampleVectorField(vectorFieldP, vectorFieldQ);
-      traces = [{
-        type: 'cone',
-        x: vf.x,
-        y: vf.y,
-        z: vf.x.map(() => 0),
-        u: vf.u,
-        v: vf.v,
-        w: vf.u.map(() => 0),
-        colorscale: 'Portland',
-        sizemode: 'scaled',
-        sizeref: 0.5
-      }];
-
+      if (!vf.error && vf.x) {
+        traces = [{
+          type: 'cone',
+          x: vf.x,
+          y: vf.y,
+          z: vf.x.map(() => 0),
+          u: vf.u,
+          v: vf.v,
+          w: vf.u.map(() => 0),
+          colorscale: 'Portland',
+          sizemode: 'scaled',
+          sizeref: 0.5
+        }];
+      }
+      
       layout = {
         autosize: true,
         paper_bgcolor: 'transparent',
