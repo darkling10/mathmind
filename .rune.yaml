@@ -1,6 +1,6 @@
 version: "1.0"
 pipeline:
-  - name: "Build Artifact"
+  - name: "Build an Artifact"
     run: "sh"
     args: 
       - "-c"
