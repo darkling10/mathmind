@@ -1,9 +1,27 @@
 version: "1.0"
 pipeline:
-  - name: "Print Node Version"
-    run: "node"
-    args: ["-v"]
-    
-  - name: "List Files"
-    run: "ls"
-    args: ["-la"]
+  - name: "Build Artifact"
+    run: "sh"
+    args: 
+      - "-c"
+      - "echo 'This is my built application artifact!' > build_artifact.txt"
+
+  - name: "Upload Artifact to AWS S3 (Floci)"
+    run: "sh"
+    args: 
+      - "-c"
+      - |
+        AWS_ACCESS_KEY_ID=test \
+        AWS_SECRET_ACCESS_KEY=test \
+        AWS_DEFAULT_REGION=us-east-1 \
+        aws s3 cp build_artifact.txt s3://rune-artifacts/build_artifact.txt --endpoint-url=http://localhost:4566
+
+  - name: "Verify Deployment"
+    run: "sh"
+    args:
+      - "-c"
+      - |
+        AWS_ACCESS_KEY_ID=test \
+        AWS_SECRET_ACCESS_KEY=test \
+        AWS_DEFAULT_REGION=us-east-1 \
+        aws s3 ls s3://rune-artifacts/ --endpoint-url=http://localhost:4566
