@@ -1,0 +1,9 @@
+version: "1.0"
+pipeline:
+  - name: "Print Node Version"
+    run: "node"
+    args: ["-v"]
+    
+  - name: "List Files"
+    run: "ls"
+    args: ["-la"]
